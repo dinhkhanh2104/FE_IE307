@@ -1,14 +1,16 @@
-import { 
-  Image, SafeAreaView, StyleSheet, 
-  Text, TextInput, View, TouchableOpacity, 
+import {
+  Image, SafeAreaView, StyleSheet,
+  Text, TextInput, View, TouchableOpacity,
   ScrollView, FlatList, flatListRef, StatusBar
 } from 'react-native'
 import React, { useState, useRef } from 'react'
-import { Icon } from 'react-native-elements'
+import { colors, Icon } from 'react-native-elements'
 import { COLORS, SIZES } from '../constants/theme'
 import { categories } from '../../data/categories'
 import { carousel as carouselData } from '../../data/carousel'
 import Card from '../components/Card'
+import { products } from '../../data/product'
+import { color } from 'react-native-elements/dist/helpers'
 
 const Home = () => {
 
@@ -25,8 +27,7 @@ const Home = () => {
   };
 
   return (
-    <SafeAreaView style = {styles.container}>
-
+    <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.wrapper}>
         <View style={styles.header}>
           <View style={styles.iconWrapper}>
@@ -143,11 +144,80 @@ const Home = () => {
           </TouchableOpacity>
         </View>
 
-        <Card />
+        <FlatList
+          data={products}
+          keyExtractor={(_, index) => index.toString()}
+          numColumns={2}
+          showsHorizontalScrollIndicator={false}
+          columnWrapperStyle={{ justifyContent: "space-between" }}
+          renderItem={
+            ({ item }) => <Card data={item} />
+          }
+          scrollEnabled={false}
+        />
+
+        <View style={{ marginTop: 10, elevation: 1, backgroundColor: COLORS.white, borderWidth: 1, borderColor: COLORS.white, borderRadius: 8 }}>
+          <Image
+            source={require('../../assets/images/banner/banner1.png')}
+            style={{ width: "100%", height: 80, }}
+          />
+        </View>
+
+        <Image
+          source={require('../../assets/images/banner/banner2.png')}
+          style={{ width: "100%", height: 140, marginTop: 16 }}
+        />
+
+        <View style={[styles.dealArea, { backgroundColor: "#FD6E87" }]}>
+          <View style={styles.dealWrapper}>
+            <Text style={styles.dealText}>Trending Products</Text>
+            <View style={styles.dealTime}>
+              <Icon name='calendar' type='antdesign' size={24} color={COLORS.white} />
+              <Text style={{ color: COLORS.white }}>Last Date 30/12/2024</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity style={styles.dealButton}>
+            <Text style={styles.dealTextButton}>View all</Text>
+            <Icon name='arrowright' type='antdesign' color={COLORS.white} />
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          data={products}
+          keyExtractor={(_, index) => index.toString()}
+          numColumns={2}
+          showsHorizontalScrollIndicator={false}
+          columnWrapperStyle={{ justifyContent: "space-between" }}
+          renderItem={
+            ({ item }) => <Card data={item} />
+          }
+          scrollEnabled={false}
+        />
+
+        <View style={{backgroundColor: COLORS.white, borderRadius: 10, paddingVertical: 10 }}>
+          <Image
+            source={require("../../assets/images/banner/banner3.png")}
+            style={{ width: "100%", height: 120, borderTopLeftRadius: 10,  borderTopRightRadius: 10 }}
+          />
+          <View style = {{flexDirection: "row", paddingHorizontal: 10, justifyContent: "space-between", alignItems: "center"}}>
+            <View style = {{gap: 6}} >
+              <Text style = {{fontFamily: "Montserrat_500Medium", fontSize: 22, marginTop: 6}}>New Arrivals</Text>
+              <Text style = {{fontFamily: "Montserrat_400Reular", fontSize: 16}}>Summer's 25 Collections</Text>
+            </View>
+
+            <TouchableOpacity style={[styles.dealButton, {backgroundColor: COLORS.primary, height: 40}]}>
+              <Text style={styles.dealTextButton}>View all</Text>
+              <Icon name='arrowright' type='antdesign' color={COLORS.white} />
+            </TouchableOpacity>
+          </View>
+
+        </View>
 
       </ScrollView>
 
     </SafeAreaView>
+
   )
 }
 
@@ -155,14 +225,12 @@ export default Home
 
 const styles = StyleSheet.create({
   container: {
-    // marginTop: SIZES.height - statusbar.height,
     flex: 1,
-    backgroundColor: "#f9f9f9"
+    backgroundColor: "#f9f9f9",
+    paddingTop: StatusBar.currentHeight + 20 || 0,
   },
 
   wrapper: {
-    // width: "100%",
-    paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 30,
   },
@@ -265,6 +333,7 @@ const styles = StyleSheet.create({
   },
   dealArea: {
     marginTop: 20,
+    marginBottom: 10,
     backgroundColor: "#4392F9",
     borderRadius: 8,
     paddingVertical: 6,
@@ -280,7 +349,6 @@ const styles = StyleSheet.create({
     fontSize: SIZES.font16,
   },
   dealWrapper: {
-
     gap: 6
   },
   dealTime: {
@@ -296,11 +364,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 6,
     paddingVertical: 6,
-    paddingHorizontal: 14
+    paddingHorizontal: 12,
+
   },
   dealTextButton: {
     color: COLORS.white,
     fontSize: SIZES.font14,
     fontFamily: "Montserrat_600SemiBold"
-  }
+  },
+
 })
