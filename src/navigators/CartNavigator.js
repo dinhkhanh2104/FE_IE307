@@ -18,10 +18,7 @@ const CartNavigator = () => {
                 name="CheckOut"
                 component={CheckOut}
                 options={{
-                    headerStyle : {
-                        borderBottomColor : 'rgba(0,0,0,0.2)',
-                        borderBottomWidth : 1,
-                    },
+                   headerShown:false
                 }}
             />
         </Stack.Navigator>
