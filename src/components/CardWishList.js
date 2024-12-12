@@ -6,8 +6,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 const CardWishList = () => {
   return (
-    <TouchableOpacity style={{ backgroundColor: "white", borderRadius: 10, elevation: 2, flexDirection: "row", height: 180, flex: 1, paddingRight: 5, gap: 10 }}>
-      <View style={{}}>
+    <TouchableOpacity style={{ backgroundColor: "white", borderRadius: 10, elevation: 2, flexDirection: "row", height: 150, flex: 1, paddingRight: 5, gap: 10 }}>
+      <View style={{height: "100%"}}>
         <Image
           source={require('../../assets/images/card/card1.jpg')}
           style={styles.image}
@@ -26,7 +26,7 @@ const CardWishList = () => {
             <Text style={styles.textProperties}>Pink</Text>
           </View>
           <TouchableOpacity>
-            <Icon name='shopping-cart' type='feather' size={32} color={COLORS.primary} />\
+            <Icon name='shopping-cart' type='feather' size={32} color={COLORS.primary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
 
   image: {
     width: 160,
-    height: 180,
+    height: "100%",
     borderRadius: 10,
 
   },
