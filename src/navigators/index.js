@@ -1,15 +1,14 @@
 import { NavigationContainer } from "@react-navigation/native";
-import { useContext } from "react"
-
 import AuthStack from "./AuthStack";
-import AuthContext from "../contexts/AuthContext"
+import { useContext } from "react";
 import BottomTabs from "./BottomTabs"
+import AuthContext from "../contexts/AuthContext";
 
 export default function Navigators() {
     const { token } = useContext(AuthContext)
     return (
         <NavigationContainer>
-            {!token ? <BottomTabs /> : <AuthStack />}
+            {token ? <BottomTabs /> : <AuthStack />}
         </NavigationContainer>
     )
 }

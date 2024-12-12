@@ -5,9 +5,9 @@ export const API_ENDPOINTS = {
     logout:"/user/logout",
 
     products: '/product',
+    category: "/category",
+    addCart: "/cart/add",
     // productDetail: "/products/",
-    // cart: "/carts/",
     // userCart: "/carts/",
     // productsByCategory: "/products/category/",
-    // category: "/products/categories",
 }

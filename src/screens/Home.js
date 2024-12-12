@@ -3,23 +3,22 @@ import {
   Text, TextInput, View, TouchableOpacity,
   ScrollView, FlatList, flatListRef, StatusBar
 } from 'react-native'
-import React, { useState, useRef } from 'react'
-import { colors, Icon } from 'react-native-elements'
+import React, { useState, useRef, useEffect } from 'react'
+import { Icon } from 'react-native-elements'
 import { COLORS, SIZES } from '../constants/theme'
-import { categories } from '../../data/categories'
 import { carousel as carouselData } from '../../data/carousel'
 import Card from '../components/Card'
-import { products } from '../../data/product'
+import { getProducts } from '../services/axios/actions/ProductAction'
+import Spinner from 'react-native-loading-spinner-overlay'
+import { getCategories } from '../services/axios/actions/Categories'
 
 
-const Home = ({navigation}) => {
+const Home = ({ navigation }) => {
 
-  const handleChooseCategory = () => {
+  const [products, setProducts] = useState([])
+  const [categories, setCategories] = useState([])
 
-  }
-  const directProductDetail = (product) => {
-    navigation.navigate('ProductDetail',{product})
-  } 
+  const [loading, setLoading] = useState(true)
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef(null);
@@ -29,11 +28,38 @@ const Home = ({navigation}) => {
     setCurrentIndex(index);
   };
 
+  const directProductDetail = (product) => {
+    navigation.navigate('ProductDetail', {product})
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const productsData = await getProducts();
+        setProducts(productsData);
+
+        const categoriesData = await getCategories()
+        setCategories(categoriesData)
+      }
+      catch (error) {
+        console.error(error);
+      }
+      finally {
+        setLoading(false);
+      }
+    }
+    fetchData()
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView 
+      <Spinner
+        size="large"
+        visible={loading}
+      />
+      <ScrollView
         contentContainerStyle={styles.wrapper}
-        showsVerticalScrollIndicator={false}  
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
           <View style={styles.iconWrapper}>
@@ -91,7 +117,7 @@ const Home = ({navigation}) => {
           horizontal
         >
           {
-            categories.map((item, index) => {
+            categories.map((item, index) => {            
               return (
                 <TouchableOpacity
                   key={index}
@@ -99,10 +125,10 @@ const Home = ({navigation}) => {
                   onPress={() => handleChooseCategory()}
                 >
                   <Image
-                    source={item.image}
+                    source={{uri: item.image}}
                     style={styles.categoryImage}
                   />
-                  <Text>{item.title}</Text>
+                  <Text style = {{fontWeight: "500"}}>{item.name}</Text>
                 </TouchableOpacity>
               )
             })
@@ -157,7 +183,7 @@ const Home = ({navigation}) => {
           showsHorizontalScrollIndicator={false}
           columnWrapperStyle={{ justifyContent: "space-between" }}
           renderItem={
-            ({ item }) => <Card data={item} onPress={() => {directProductDetail(item)}} />
+            ({ item }) => <Card data={item} onPress={() => { directProductDetail(item) }} />
           }
           scrollEnabled={false}
         />
@@ -196,23 +222,23 @@ const Home = ({navigation}) => {
           showsHorizontalScrollIndicator={false}
           columnWrapperStyle={{ justifyContent: "space-between" }}
           renderItem={
-            ({ item }) => <Card data={item} onPress={() => {directProductDetail(item)}}/>
+            ({ item }) => <Card data={item} onPress={() => { directProductDetail(item) }} />
           }
           scrollEnabled={false}
         />
 
-        <View style={{backgroundColor: COLORS.white, borderRadius: 10, paddingVertical: 10 }}>
+        <View style={{ backgroundColor: COLORS.white, borderRadius: 10, paddingVertical: 10 }}>
           <Image
             source={require("../../assets/images/banner/banner3.png")}
-            style={{ width: "100%", height: 120, borderTopLeftRadius: 10,  borderTopRightRadius: 10 }}
+            style={{ width: "100%", height: 120, borderTopLeftRadius: 10, borderTopRightRadius: 10 }}
           />
-          <View style = {{flexDirection: "row", paddingHorizontal: 10, justifyContent: "space-between", alignItems: "center"}}>
-            <View style = {{gap: 6}} >
-              <Text style = {{fontFamily: "Montserrat_500Medium", fontSize: 22, marginTop: 6}}>New Arrivals</Text>
-              <Text style = {{fontFamily: "Montserrat_400Reular", fontSize: 16}}>Summer's 25 Collections</Text>
+          <View style={{ flexDirection: "row", paddingHorizontal: 10, justifyContent: "space-between", alignItems: "center" }}>
+            <View style={{ gap: 6 }} >
+              <Text style={{ fontFamily: "Montserrat_500Medium", fontSize: 22, marginTop: 6 }}>New Arrivals</Text>
+              <Text style={{ fontFamily: "Montserrat_400Reular", fontSize: 16 }}>Summer's 25 Collections</Text>
             </View>
 
-            <TouchableOpacity style={[styles.dealButton, {backgroundColor: COLORS.primary, height: 40}]}>
+            <TouchableOpacity style={[styles.dealButton, { backgroundColor: COLORS.primary, height: 40 }]}>
               <Text style={styles.dealTextButton}>View all</Text>
               <Icon name='arrowright' type='antdesign' color={COLORS.white} />
             </TouchableOpacity>
@@ -305,6 +331,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "column",
     marginHorizontal: 9,
+    gap: 10
   },
   categoryImage: {
     width: 74,

@@ -22,3 +22,8 @@ export const getCart = async (id) => {
     // return axiosInstance.get(API_ENDPOINTS.userCart + id)
 }
 
+export const addToCard = async (sku, id) => {
+    console.log(sku, id)
+    return axiosInstance.post(API_ENDPOINTS.addCart, {sku, quantity: 1, id})
+}
+

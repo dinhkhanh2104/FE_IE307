@@ -11,7 +11,7 @@ const Stack = createStackNavigator()
 export default function AuthStack() {
     return (
         <Stack.Navigator
-            initialRouteName="Login"
+            initialRouteName="IntroSlider"
             screenOptions={{
                 headerShown: false
             }}

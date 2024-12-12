@@ -4,7 +4,7 @@ import {
   Text,
   Image,
   StyleSheet,
-  FlatList,
+FlatList,
   TouchableOpacity,
   ScrollView,
   StatusBar,
@@ -12,32 +12,36 @@ import {
 } from 'react-native';
 import { COLORS, SIZES } from '../constants/theme';
 import { Icon } from 'react-native-elements';
+import Toast from 'react-native-toast-message';
+import { addToCard } from '../services/axios/actions/CartAction';
+
 import { createNativeWrapper } from 'react-native-gesture-handler';
 
-const ProductDetail = () => {
+
+const ProductDetail = ({ route, navigation }) => {
+
+  const { product } = route.params
+
+
+  const images = [...product.images, ...product.variations.flatMap(variation => variation.images)]
+  const price = product.variations[0].price
+
+  const colors = product.variations.map(variation => {
+    const colorAttribute = variation.attributes.find(attr => attr.attributeName === "Màu sắc");
+    return colorAttribute ? colorAttribute.values[0] : null;
+  });
+
   const [selectedColor, setSelectedColor] = useState();
-  const [selectedSize, setSelectedSize] = useState()
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [selectedPrice, setSelectedPrice] = useState(price);
+  const [selectedItem, setSelectedItem] = useState()
 
-  const images = [
-    { uri: 'https://s3-alpha-sig.figma.com/img/337a/22ae/49b350434fc9e50a9abb7351559ff374?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=BAq~MJwQhMRVfwkfIa1kaSBiHG730qlg0bV~~KolTmp3mkXKn-elmHOvlrZpCIgVjMoMY~gn1EO-m1eiC6EuSV4QLH1mvUP7TtoemlpS9GHj-fcewTLmiwDDceBrnDo2cIVP-6aqY39HSlmnGTJh9FKd9MZ5BOya-q0J13YSR3xHnDCvyDqXim0zNuxh14fjn1p5aMb0~pAn1jZIhkbVXqGukdnCKHwGyY-8Qia4Y7-V2k5DniuW1Jgm8ov5j0~sI1zJk2RBy1j-VonvM0tCwwAc7U17AcYDMHfRfWqHDL62OLlHAvSYoHthd~mctzxVMKJo2vmgdVUpbLhpnaOnSg__' },
-    { uri: 'https://s3-alpha-sig.figma.com/img/337a/22ae/49b350434fc9e50a9abb7351559ff374?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=BAq~MJwQhMRVfwkfIa1kaSBiHG730qlg0bV~~KolTmp3mkXKn-elmHOvlrZpCIgVjMoMY~gn1EO-m1eiC6EuSV4QLH1mvUP7TtoemlpS9GHj-fcewTLmiwDDceBrnDo2cIVP-6aqY39HSlmnGTJh9FKd9MZ5BOya-q0J13YSR3xHnDCvyDqXim0zNuxh14fjn1p5aMb0~pAn1jZIhkbVXqGukdnCKHwGyY-8Qia4Y7-V2k5DniuW1Jgm8ov5j0~sI1zJk2RBy1j-VonvM0tCwwAc7U17AcYDMHfRfWqHDL62OLlHAvSYoHthd~mctzxVMKJo2vmgdVUpbLhpnaOnSg__' },
-    { uri: 'https://s3-alpha-sig.figma.com/img/337a/22ae/49b350434fc9e50a9abb7351559ff374?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=BAq~MJwQhMRVfwkfIa1kaSBiHG730qlg0bV~~KolTmp3mkXKn-elmHOvlrZpCIgVjMoMY~gn1EO-m1eiC6EuSV4QLH1mvUP7TtoemlpS9GHj-fcewTLmiwDDceBrnDo2cIVP-6aqY39HSlmnGTJh9FKd9MZ5BOya-q0J13YSR3xHnDCvyDqXim0zNuxh14fjn1p5aMb0~pAn1jZIhkbVXqGukdnCKHwGyY-8Qia4Y7-V2k5DniuW1Jgm8ov5j0~sI1zJk2RBy1j-VonvM0tCwwAc7U17AcYDMHfRfWqHDL62OLlHAvSYoHthd~mctzxVMKJo2vmgdVUpbLhpnaOnSg__' },
-  ];
-
-  const colors = ['Pink', 'Yellow', 'Blue'];
-  const sizes = ['X', 'L', 'M']
-
-  const popularItems = [
-
-    { id: 1, title: 'Item 1', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/337a/22ae/49b350434fc9e50a9abb7351559ff374?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=BAq~MJwQhMRVfwkfIa1kaSBiHG730qlg0bV~~KolTmp3mkXKn-elmHOvlrZpCIgVjMoMY~gn1EO-m1eiC6EuSV4QLH1mvUP7TtoemlpS9GHj-fcewTLmiwDDceBrnDo2cIVP-6aqY39HSlmnGTJh9FKd9MZ5BOya-q0J13YSR3xHnDCvyDqXim0zNuxh14fjn1p5aMb0~pAn1jZIhkbVXqGukdnCKHwGyY-8Qia4Y7-V2k5DniuW1Jgm8ov5j0~sI1zJk2RBy1j-VonvM0tCwwAc7U17AcYDMHfRfWqHDL62OLlHAvSYoHthd~mctzxVMKJo2vmgdVUpbLhpnaOnSg__' } },
-    { id: 2, title: 'Item 2', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/902c/2ed6/848fbde49066a7244b1f4197b721c175?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=hgQpK~jDV3IopeXCIAw8m5sTwln45rWkENqh0V~BXL3GBjp5194SqeGFF6UDy0tnxstBVG6k91iYlAY0-w7AjUJNJtWBOLvroQjcUogKt~uSNI5~CwAljS~Rb3V9ikKQ53XbPXQ8I4DWIYadTxGzGea-Lb3A4MH5EjU~Hd1fZV3UpUE0YaT79at8BBnosQCON75S7KtmJ2Ex6xHjJiH37a8ufjJIViy5PJ5vpuK1NkuiNeCBbaiyhm4ohwHORvNEL~CDkj65jm5NNSQFp03u1BTzsHs7bTkY6DRWCr8uBRPdOnQgiipqv6-vS2ZaMeJHAzYM6n4reFZwkzZasyMBPw__' } },
-    { id: 3, title: 'Item 2', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/902c/2ed6/848fbde49066a7244b1f4197b721c175?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=hgQpK~jDV3IopeXCIAw8m5sTwln45rWkENqh0V~BXL3GBjp5194SqeGFF6UDy0tnxstBVG6k91iYlAY0-w7AjUJNJtWBOLvroQjcUogKt~uSNI5~CwAljS~Rb3V9ikKQ53XbPXQ8I4DWIYadTxGzGea-Lb3A4MH5EjU~Hd1fZV3UpUE0YaT79at8BBnosQCON75S7KtmJ2Ex6xHjJiH37a8ufjJIViy5PJ5vpuK1NkuiNeCBbaiyhm4ohwHORvNEL~CDkj65jm5NNSQFp03u1BTzsHs7bTkY6DRWCr8uBRPdOnQgiipqv6-vS2ZaMeJHAzYM6n4reFZwkzZasyMBPw__' } },
-    { id: 4, title: 'Item 2', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/902c/2ed6/848fbde49066a7244b1f4197b721c175?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=hgQpK~jDV3IopeXCIAw8m5sTwln45rWkENqh0V~BXL3GBjp5194SqeGFF6UDy0tnxstBVG6k91iYlAY0-w7AjUJNJtWBOLvroQjcUogKt~uSNI5~CwAljS~Rb3V9ikKQ53XbPXQ8I4DWIYadTxGzGea-Lb3A4MH5EjU~Hd1fZV3UpUE0YaT79at8BBnosQCON75S7KtmJ2Ex6xHjJiH37a8ufjJIViy5PJ5vpuK1NkuiNeCBbaiyhm4ohwHORvNEL~CDkj65jm5NNSQFp03u1BTzsHs7bTkY6DRWCr8uBRPdOnQgiipqv6-vS2ZaMeJHAzYM6n4reFZwkzZasyMBPw__' } },
-    { id: 5, title: 'Item 2', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/902c/2ed6/848fbde49066a7244b1f4197b721c175?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=hgQpK~jDV3IopeXCIAw8m5sTwln45rWkENqh0V~BXL3GBjp5194SqeGFF6UDy0tnxstBVG6k91iYlAY0-w7AjUJNJtWBOLvroQjcUogKt~uSNI5~CwAljS~Rb3V9ikKQ53XbPXQ8I4DWIYadTxGzGea-Lb3A4MH5EjU~Hd1fZV3UpUE0YaT79at8BBnosQCON75S7KtmJ2Ex6xHjJiH37a8ufjJIViy5PJ5vpuK1NkuiNeCBbaiyhm4ohwHORvNEL~CDkj65jm5NNSQFp03u1BTzsHs7bTkY6DRWCr8uBRPdOnQgiipqv6-vS2ZaMeJHAzYM6n4reFZwkzZasyMBPw__' } },
-    { id: 6, title: 'Item 2', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/902c/2ed6/848fbde49066a7244b1f4197b721c175?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=hgQpK~jDV3IopeXCIAw8m5sTwln45rWkENqh0V~BXL3GBjp5194SqeGFF6UDy0tnxstBVG6k91iYlAY0-w7AjUJNJtWBOLvroQjcUogKt~uSNI5~CwAljS~Rb3V9ikKQ53XbPXQ8I4DWIYadTxGzGea-Lb3A4MH5EjU~Hd1fZV3UpUE0YaT79at8BBnosQCON75S7KtmJ2Ex6xHjJiH37a8ufjJIViy5PJ5vpuK1NkuiNeCBbaiyhm4ohwHORvNEL~CDkj65jm5NNSQFp03u1BTzsHs7bTkY6DRWCr8uBRPdOnQgiipqv6-vS2ZaMeJHAzYM6n4reFZwkzZasyMBPw__' } },
-    { id: 7, title: 'Item 2', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/902c/2ed6/848fbde49066a7244b1f4197b721c175?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=hgQpK~jDV3IopeXCIAw8m5sTwln45rWkENqh0V~BXL3GBjp5194SqeGFF6UDy0tnxstBVG6k91iYlAY0-w7AjUJNJtWBOLvroQjcUogKt~uSNI5~CwAljS~Rb3V9ikKQ53XbPXQ8I4DWIYadTxGzGea-Lb3A4MH5EjU~Hd1fZV3UpUE0YaT79at8BBnosQCON75S7KtmJ2Ex6xHjJiH37a8ufjJIViy5PJ5vpuK1NkuiNeCBbaiyhm4ohwHORvNEL~CDkj65jm5NNSQFp03u1BTzsHs7bTkY6DRWCr8uBRPdOnQgiipqv6-vS2ZaMeJHAzYM6n4reFZwkzZasyMBPw__' } },
-  ];
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+    }).format(amount);
+};
 
   const relatedItems = [
     { id: 1, title: 'Item 1', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/32b2/fed3/dd6e97ca36cbcbf5ca57596f7c6547d3?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=cMvCxnGq5IAD7O4TkGF6K30c0Xv8QNdC3CwdnW2Xagf37NzAxgGHXhr8CSQtgN26DLS9Oili5YHq9sa1c9hm78aWj7mV6PF4tIji2nj5U7PvgmkUaNd48yRMCD81pjA56Wb30~Rtxk22rsQxlgZOvMi9l9yK8EG9dKaQaFy0oIvxQIJhZFjHruWOSR-BRl~JOUPrbxLpguj-8~E1e11ykUWKDsCUIxAmy5Ngo0MGba2pAljqFpf5ZCv3cg4-MWTCwALie-kVsIDRnmQrZYtekWmljesj5IAHfDUVBa6nVCHINUrm0zsvAj0weYIeSm~kFd5OcLj84hkuIKbfC3nksQ__' } },
@@ -50,8 +54,34 @@ const ProductDetail = () => {
     setActiveImageIndex(index);
   };
 
-  const [selectedItem, setSelectedItem] = useState(null);
+  const selectedVariation = product.variations.find(variation =>
+    variation.attributes.some(attr => attr.attributeName === "Màu sắc" && attr.values.includes(selectedColor))
+  );
 
+  const handleColorChange = (color) => {
+    setSelectedColor(color);
+    const variation = product.variations.find(variation =>
+      variation.attributes.some(attr => attr.attributeName === "Màu sắc" && attr.values.includes(color))
+    );
+    if (variation) {
+      setSelectedPrice(variation.price);
+      setActiveImageIndex(0);
+      setSelectedItem(variation)
+    }
+  };
+
+  const handleAddToCart = async () => {
+    try {
+      const response = await addToCard(selectedItem.sku, product._id)
+      console.log(selectedItem.sku, product.id);
+      
+      Toast.show({ type: 'success', text1: "Add to cart successfully" });
+    }
+    catch (error) {
+      console.error("Error", error);
+      Toast.show({ type: 'error', text1: "Add to cart failed. Please try again." });
+  }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -62,24 +92,26 @@ const ProductDetail = () => {
 
         <View style={styles.imageSlider}>
           <FlatList
-            data={images}
+            data={selectedVariation ? selectedVariation.images : images}
             horizontal
             showsHorizontalScrollIndicator={false}
             pagingEnabled
             keyExtractor={(_, index) => index.toString()}
             onScroll={handleImageScroll}
             renderItem={({ item }) => (
-              <Image source={item} style={styles.productImage} />
+              <Image source={{ uri: item }} style={styles.productImage} />
             )}
           />
           <View style={styles.pagination}>
-            {images.map((_, index) => (
+            {selectedVariation ? selectedVariation.images.map((_, index) => (
               <View
                 key={index}
-                style={[
-                  styles.dot,
-                  activeImageIndex === index && styles.activeDot,
-                ]}
+                style={[styles.dot, activeImageIndex === index && styles.activeDot]}
+              />
+            )) : images.map((_, index) => (
+              <View
+                key={index}
+                style={[styles.dot, activeImageIndex === index && styles.activeDot]}
               />
             ))}
           </View>
@@ -87,19 +119,18 @@ const ProductDetail = () => {
 
         <View style={styles.productInfo}>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <Text style={styles.price}>200.000đ</Text>
+            <Text style={styles.price}>{formatCurrency(selectedPrice)}</Text>
             <View style={styles.iconWrapper}>
               <Icon name='share-a' type='fontisto' size={14} color={"#B5A2A2"} />
             </View>
           </View>
-          <Text style={styles.description}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam arcu
-            mauris, scelerisque eu mauris id, pretium pulvinar sapien.
-          </Text>
+          <Text style={styles.title}>{product.name}</Text>
+          <Text style={styles.description}>{product.description}</Text>
         </View>
 
+        {/* Phần màu sắc (variations) */}
         <View style={styles.variations}>
-          <Text style={styles.sectionTitle}>Variations</Text>
+          <Text style={styles.sectionTitle}>Màu sắc</Text>
           <FlatList
             data={colors}
             horizontal
@@ -110,48 +141,12 @@ const ProductDetail = () => {
                   styles.colorBox,
                   selectedColor === item && styles.selectedVariation,
                 ]}
-                onPress={() => setSelectedColor(item)}
+                onPress={() => handleColorChange(item)}
               >
                 <Text style={styles.variationText}>{item}</Text>
               </TouchableOpacity>
             )}
           />
-
-          <FlatList
-            data={sizes}
-            horizontal
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.colorBox,
-                  selectedSize === item && styles.selectedVariation,
-                ]}
-                onPress={() => setSelectedSize(item)}
-              >
-                <Text style={styles.variationText}>{item}</Text>
-              </TouchableOpacity>
-            )}
-          />
-
-          <FlatList
-            data={popularItems}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.popularItem,
-                  selectedItem === item.id && styles.selectedItemBorder,
-                ]}
-                onPress={() => setSelectedItem(item.id)}
-              >
-                <Image source={item.image} style={styles.popularImage} />
-              </TouchableOpacity>
-            )}
-          />
-
         </View>
 
         {/* Specifications */}
@@ -261,7 +256,7 @@ const ProductDetail = () => {
         {/* <Icon name="heart" type="octicon" size={40} color={COLORS.black} /> */}
         <Icon name="heart-fill" type="octicon" size={40} color={COLORS.primary} />
 
-        <TouchableOpacity style={styles.addToCartButton}>
+        <TouchableOpacity style={styles.addToCartButton} onPress={handleAddToCart}>
           <Text style={styles.addToCartText}>Add to cart</Text>
         </TouchableOpacity>
 
@@ -316,7 +311,8 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   price: {
-    fontSize: 24,
+    fontSize: 22,
+    color: COLORS.primary,
     fontWeight: 'bold',
   },
   iconWrapper: {
@@ -341,6 +337,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold"
   },
   colorBox: {
     width: 80,

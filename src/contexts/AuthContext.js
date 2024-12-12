@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import { getCart } from "../services/axios/actions/CartAction";
+import { jwtDecode } from "jwt-decode";
 
 
 const AuthContext = createContext({})
