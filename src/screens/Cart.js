@@ -13,7 +13,7 @@ import { COLORS } from '../constants/theme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import CardWishList from '../components/CardWishList';
 
-const Cart = () => {
+const Cart = ({navigation}) => {
   const [cartItems, setCartItems] = useState([
     {
       id: '1',
@@ -76,11 +76,15 @@ const Cart = () => {
     setCartItems((prev) => prev.filter((item) => item.id !== itemId));
   };
 
+  const handleNavigateCheckOut = () => {
+    navigation.navigate("CheckOut")
+  }
   const calculateTotal = () =>
     cartItems
       .reduce((sum, item) => sum + item.price * item.quantity, 0)
       .toFixed(2);
 
+  
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ flex: 1 }}>
@@ -108,61 +112,62 @@ const Cart = () => {
 
           {/* Cart Items */}
           {
-             cartItems.length > 0 ? 
-             <FlatList
-            data={cartItems}
-            renderItem={({ item }) => (
-              <View style={styles.cartItem}>
-                <Image source={{ uri: item.image }} style={styles.image} />
-                <TouchableOpacity style={
-                  {
-                    position: "absolute", bottom: 10, left: 10, backgroundColor: "white", borderRadius: 999,
-                    width: 40, height: 40, justifyContent: "center", alignItems: "center"
-                  }}>
-                  <Ionicons name="trash-outline" size={26} color={COLORS.primary} />
-                </TouchableOpacity>
-                <View style={styles.itemDetails}>
-                  <Text style={styles.title}>{item.title}</Text>
-                  <Text style={styles.subtitle}>{`${item.color}, Size ${item.size}`}</Text>
-                  <View style={styles.itemFooter}>
-                    <Text style={styles.price}>${item.price.toFixed(2)}</Text>
-                    <View style={styles.quantityControl}>
-                      <TouchableOpacity
-                        onPress={() => decrementQuantity(item.id)}
-                        style={styles.controlButtonContainer}
-                      >
-                        <Text style={styles.controlButton}>-</Text>
-                      </TouchableOpacity>
-                      <Text style={styles.quantity}>{item.quantity}</Text>
-                      <TouchableOpacity
-                        onPress={() => incrementQuantity(item.id)}
-                        style={styles.controlButtonContainer}
-                      >
-                        <Text style={styles.controlButton}>+</Text>
-                      </TouchableOpacity>
+            cartItems.length > 0 ?
+              <FlatList
+                data={cartItems}
+                renderItem={({ item }) => (
+                  <View style={styles.cartItem}>
+                    <Image source={{ uri: item.image }} style={styles.image} />
+                    <TouchableOpacity style={
+                      {
+                        position: "absolute", bottom: 10, left: 10, backgroundColor: "white", borderRadius: 999,
+                        width: 40, height: 40, justifyContent: "center", alignItems: "center"
+                      }}>
+                      <Ionicons name="trash-outline" size={26} color={COLORS.primary} />
+                    </TouchableOpacity>
+                    <View style={styles.itemDetails}>
+                      <Text style={styles.title}>{item.title}</Text>
+                      <Text style={styles.subtitle}>{`${item.color}, Size ${item.size}`}</Text>
+                      <View style={styles.itemFooter}>
+                        <Text style={styles.price}>${item.price.toFixed(2)}</Text>
+                        <View style={styles.quantityControl}>
+                          <TouchableOpacity
+                            onPress={() => decrementQuantity(item.id)}
+                            style={styles.controlButtonContainer}
+                          >
+                            <Text style={styles.controlButton}>-</Text>
+                          </TouchableOpacity>
+                          <Text style={styles.quantity}>{item.quantity}</Text>
+                          <TouchableOpacity
+                            onPress={() => incrementQuantity(item.id)}
+                            style={styles.controlButtonContainer}
+                          >
+                            <Text style={styles.controlButton}>+</Text>
+                          </TouchableOpacity>
+                        </View>
+
+                      </View>
                     </View>
-                    
                   </View>
-                </View>
+                )}
+                keyExtractor={(item) => item.id}
+                style={styles.cartList}
+              /> :
+              <View style={styles.iconContainer}>
+                <Ionicons
+                  name="bag-add-sharp"
+                  size={80}
+                  color="#004CFF"
+                  style={styles.iconStyle}
+                />
               </View>
-            )}
-            keyExtractor={(item) => item.id}
-            style={styles.cartList}
-          />  : 
-          <View style={styles.iconContainer}>
-            <Ionicons
-              name="bag-add-sharp"
-              size={80}
-              color="#004CFF"
-              style={styles.iconStyle}
-            />
-          </View>
-        
+
           }
 
           {/* Wishlist Section */}
           <Text style={styles.sectionTitle}>From Your Wishlist</Text>
           <FlatList
+            scrollEnabled = {false}
             data={wishlistItems}
             renderItem={({ item }) => (
               <View style={{ margin: 16 }}>
@@ -177,11 +182,11 @@ const Cart = () => {
         {/* Fixed Total and Checkout */}
         <View style={styles.totalContainer}>
           <Text style={styles.totalText}>Total: ${calculateTotal()}</Text>
-          { cartItems.length > 0 ? 
-            <TouchableOpacity style={styles.checkoutButton}>
+          {cartItems.length > 0 ?
+            <TouchableOpacity style={styles.checkoutButton} onPress={handleNavigateCheckOut}>
               <Text style={styles.checkoutText}>Checkout</Text>
             </TouchableOpacity>
-          :
+            :
             <TouchableOpacity style={styles.checkoutButtonNone} disabled>
               <Text style={styles.checkoutTextNone}>Checkout</Text>
             </TouchableOpacity>
@@ -272,7 +277,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1, // Shadow opacity
     shadowRadius: 2, // Shadow radius
     elevation: 2, // For Android shadow
-    padding:5
+    padding: 5
   },
   image: {
     width: 160,
@@ -349,16 +354,16 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: '#ccc',
     alignItems: 'center',
-    flexDirection:'row',
-    justifyContent:'space-between',
-    gap:10
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10
   },
   totalText: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 16,
-    textAlign:'center',
-    justifyContent:'center'
+    textAlign: 'center',
+    justifyContent: 'center'
   },
   checkoutButton: {
     backgroundColor: 'blue',
@@ -386,8 +391,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center', // Centers vertically
     alignItems: 'center', // Centers horizontally
     flex: 1,
-    padding:10,
-    marginVertical:80
+    padding: 10,
+    marginVertical: 80
   },
   iconStyle: {
     borderRadius: 80, // Half of the size to make it circular

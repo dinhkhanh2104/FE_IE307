@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useEffect } from "react";
 import { getCart } from "../services/axios/actions/CartAction";
 
 

@@ -1,4 +1,4 @@
-import { Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native'
 import React, { useContext, useState } from 'react'
 import { SIZES } from '../constants/theme'
 import InputField from '../components/InputField'
@@ -17,7 +17,7 @@ const Login = ({ navigation }) => {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
 
-  const {setToken} = useContext(AuthContext)
+  const { setToken } = useContext(AuthContext)
   const [loading, setLoading] = useState(false)
 
   const handleNavigateRegister = () => {
@@ -28,29 +28,29 @@ const Login = ({ navigation }) => {
     navigation.navigate("ForgotPassword")
   }
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
       Alert.alert("You forgot to enter all both field 😤", "Email or password must not be empty !");
       return;
-  }
-  try {
+    }
+    try {
       setLoading(true);
       const response = await login(username.trim(), password.trim());
       setToken(response.data.token);
       Alert.alert("Hi 🫡", "We’re glad to have you here 🤗");
       setLoading(false);
       navigation.navigate("IntroSlider")
-  } 
-  catch (error) {
+    }
+    catch (error) {
       setLoading(false);
       if (error.response) {
-          Alert.alert("Ohh! 😫", "Incorrect email or password :(");
+        Alert.alert("Ohh! 😫", "Incorrect email or password :(");
       } else {
-          Alert.alert("Error", "Network error or server not reachable.");
+        Alert.alert("Error", "Network error or server not reachable.");
       }
-      setEmailInput('');
-      setPasswordInput('');
-  }
+      setUsername('');
+      setPassword('');
+    }
   }
   return (
     <SafeAreaView style={styles.container}>
