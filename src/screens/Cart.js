@@ -9,8 +9,9 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
-import { COLORS } from '../constants/theme'; // Ensure COLORS is correctly imported
+import { COLORS } from '../constants/theme';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import CardWishList from '../components/CardWishList';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([
@@ -76,7 +77,9 @@ const Cart = () => {
   };
 
   const calculateTotal = () =>
-    cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
+    cartItems
+      .reduce((sum, item) => sum + item.price * item.quantity, 0)
+      .toFixed(2);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -92,20 +95,15 @@ const Cart = () => {
         {/* Shipping Address */}
         <View style={styles.addressContainer}>
           <Text style={styles.addressTitle}>Shipping Address</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+          <View style={styles.addressRow}>
             <Text style={styles.address}>
               26, Duong So 2, Thao Dien Ward, An Phu, District 2, Ho Chi Minh City
             </Text>
             <TouchableOpacity style={styles.editIconContainer}>
-              <Ionicons
-                name="pencil-sharp"
-                color="#fff"
-                size={20} // Adjust icon size as per your preference
-              />
+              <Ionicons name="pencil-sharp" color="#fff" size={20} />
             </TouchableOpacity>
           </View>
         </View>
-
 
         {/* Cart Items */}
         <FlatList
@@ -113,30 +111,31 @@ const Cart = () => {
           renderItem={({ item }) => (
             <View style={styles.cartItem}>
               <Image source={{ uri: item.image }} style={styles.image} />
-              <View style={{justifyContent:'space-between', flex:0.8}}>
-                <Text style={styles.title}>
-                {item.title}
-                </Text>
-                <Text style={styles.subtitle}>
-                  {`${item.color}, Size ${item.size}`}
-                </Text>
-                <View style={{flexDirection:"row", justifyContent:"space-between"}}>
+              <View style={styles.itemDetails}>
+                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.subtitle}>{`${item.color}, Size ${item.size}`}</Text>
+                <View style={styles.itemFooter}>
                   <Text style={styles.price}>${item.price.toFixed(2)}</Text>
                   <View style={styles.quantityControl}>
-                    <TouchableOpacity onPress={() => decrementQuantity(item.id)} style={styles.controlButtonContainer}>
+                    <TouchableOpacity
+                      onPress={() => decrementQuantity(item.id)}
+                      style={styles.controlButtonContainer}
+                    >
                       <Text style={styles.controlButton}>-</Text>
                     </TouchableOpacity>
                     <Text style={styles.quantity}>{item.quantity}</Text>
-                    <TouchableOpacity onPress={() => incrementQuantity(item.id)} style={styles.controlButtonContainer}>
+                    <TouchableOpacity
+                      onPress={() => incrementQuantity(item.id)}
+                      style={styles.controlButtonContainer}
+                    >
                       <Text style={styles.controlButton}>+</Text>
                     </TouchableOpacity>
                   </View>
                   <TouchableOpacity onPress={() => removeItem(item.id)}>
-                    <Ionicons name="trash-bin-outline" style={styles.deleteButton}></Ionicons>
+                    <Ionicons name="trash-bin-outline" style={styles.deleteButton} />
                   </TouchableOpacity>
                 </View>
               </View>
-             
             </View>
           )}
           keyExtractor={(item) => item.id}
@@ -148,13 +147,8 @@ const Cart = () => {
         <FlatList
           data={wishlistItems}
           renderItem={({ item }) => (
-            <View style={styles.cartItem}>
-              <Image source={{ uri: item.image }} style={styles.image} />
-              <View style={styles.details}>
-                <Text style={styles.title}>{item.title}</Text>
-                <Text style={styles.subtitle}>{`${item.color}, Size ${item.size}`}</Text>
-                <Text style={styles.price}>${item.price.toFixed(2)}</Text>
-              </View>
+            <View style={{margin:10}}>
+              <CardWishList/>
             </View>
           )}
           keyExtractor={(item) => item.id}
@@ -180,10 +174,10 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   header: {
-    padding:10,
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
+    paddingHorizontal: 16,
   },
   heading: {
     fontSize: 26,
@@ -205,29 +199,33 @@ const styles = StyleSheet.create({
   addressContainer: {
     backgroundColor: '#f5f5f5',
     padding: 16,
-    margin:10,
     borderRadius: 8,
+    marginHorizontal: 16,
     marginBottom: 16,
   },
   addressTitle: {
     fontWeight: 'bold',
-    marginBottom: 8,
     fontSize: 16,
   },
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
   address: {
-    flex: 1, // Takes available space
+    flex: 1,
     fontSize: 14,
     color: '#000',
   },
   editIconContainer: {
-    backgroundColor: 'blue',
-    borderRadius: 17,
-    padding:5, // Circular shape
+    backgroundColor: '#004BFE',
+    borderRadius: 17.5,
+    padding: 5,
     width: 35,
     height: 35,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 16, // Space between address and icon
+    marginLeft: 16,
   },
   cartList: {
     marginBottom: 16,
@@ -236,80 +234,90 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
-    marginHorizontal:10
+    marginHorizontal: 16,
   },
   image: {
-    width: 110,
-    height: 100,
+    width: 130,
+    height: 120,
     borderRadius: 8,
     marginRight: 16,
+    padding:10,
+    backgroundColor:'red',
+    shadowColor:'#ccc'
   },
-  details: {
+  itemDetails: {
     flex: 1,
+    justifyContent: 'space-between',
   },
   title: {
     fontWeight: 'bold',
     fontSize: 16,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#888',
   },
   price: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    marginTop: 4,
+  },
+  itemFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   quantityControl: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 8,
-  },
-  quantityControl: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    borderRadius: 4,
   },
   controlButtonContainer: {
-    paddingHorizontal: 8,
-
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#004BFE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 4,
   },
   controlButton: {
-    fontSize: 20,
-    color: COLORS.primary || '#007bff',
-    fontWeight: '600',
+    fontSize: 16,
+    color: '#004BFE',
   },
   quantity: {
     fontSize: 16,
     fontWeight: '600',
-    paddingHorizontal: 8,
-  },
+    backgroundColor: '#E5EBFC',
+    lineHeight:32,
+    width:37,
+    textAlign:'center',
+    borderRadius:6
+  },   
   deleteButton: {
     fontSize: 20,
-    color: 'red',
+    color: '#D97474',
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginHorizontal: 16,
+    marginVertical: 8,
   },
   totalContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#ccc',
-    paddingVertical: 16,
+    borderColor: '#ccc',
+    alignItems: 'center',
   },
   totalText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
+    marginBottom: 16,
   },
   checkoutButton: {
-    backgroundColor: '#007bff',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    backgroundColor: 'blue',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
     borderRadius: 8,
   },
   checkoutText: {
