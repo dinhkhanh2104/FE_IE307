@@ -10,13 +10,16 @@ import { categories } from '../../data/categories'
 import { carousel as carouselData } from '../../data/carousel'
 import Card from '../components/Card'
 import { products } from '../../data/product'
-import { color } from 'react-native-elements/dist/helpers'
 
-const Home = () => {
+
+const Home = ({navigation}) => {
 
   const handleChooseCategory = () => {
 
   }
+  const directProductDetail = (product) => {
+    navigation.navigate('ProductDetail',{product})
+  } 
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef(null);
@@ -28,7 +31,10 @@ const Home = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.wrapper}>
+      <ScrollView 
+        contentContainerStyle={styles.wrapper}
+        showsVerticalScrollIndicator={false}  
+      >
         <View style={styles.header}>
           <View style={styles.iconWrapper}>
             <Icon name='menu' type='feather' size={24} />
@@ -151,7 +157,7 @@ const Home = () => {
           showsHorizontalScrollIndicator={false}
           columnWrapperStyle={{ justifyContent: "space-between" }}
           renderItem={
-            ({ item }) => <Card data={item} />
+            ({ item }) => <Card data={item} onPress={() => {directProductDetail(item)}} />
           }
           scrollEnabled={false}
         />
@@ -190,7 +196,7 @@ const Home = () => {
           showsHorizontalScrollIndicator={false}
           columnWrapperStyle={{ justifyContent: "space-between" }}
           renderItem={
-            ({ item }) => <Card data={item} />
+            ({ item }) => <Card data={item} onPress={() => {directProductDetail(item)}}/>
           }
           scrollEnabled={false}
         />
