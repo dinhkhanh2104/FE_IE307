@@ -7,7 +7,6 @@ import BottomTabs from "./BottomTabs"
 
 export default function Navigators() {
     const { token } = useContext(AuthContext)
-    // console.log(token);
     return (
         <NavigationContainer>
             {token ? <BottomTabs /> : <AuthStack />}
