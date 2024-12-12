@@ -2,7 +2,8 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { FontAwesome, AntDesign } from "@expo/vector-icons";
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import Home from "../screens/Home";
+import ProductDetail from "../screens/ProductDetail";
+import HomeNavigator from "./HomeNavigator"
 import Wishlist from "../screens/Wishlist";
 import Cart from "../screens/Cart";
 import Profile from "../screens/Profile";
@@ -30,7 +31,7 @@ export default function BottomTabs() {
         >
             <Tab.Screen
                 name="Home"
-                component={Home}
+                component={HomeNavigator}
                 options={{
                     tabBarIcon: ({ focused }) => {
                         return <Icon name="home" type="feather" size={24} color={focused ? COLORS.primary : COLORS.black}/>
@@ -62,8 +63,9 @@ export default function BottomTabs() {
                 }}
             />
                 <Tab.Screen
-                    name="Profile"
-                    component={Profile}
+                    name="ProductDetail"
+                    // component={Profile}
+                    component={ProductDetail}
                     options={{
                         tabBarIcon: ({ focused }) => {
                             return <Icon name="user" type="feather" size={24} color={focused ? COLORS.primary : COLORS.black}/>

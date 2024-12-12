@@ -3,11 +3,14 @@ import React from 'react';
 import { Icon } from 'react-native-elements';
 import { COLORS, SIZES } from '../constants/theme';
 
-const Card = ({ data }) => {
+const Card = ({ data, onPress}) => {
     // console.log(data.);
     
     return (
-        <TouchableOpacity style={styles.cardContainer}>
+        <TouchableOpacity 
+            style={styles.cardContainer}
+            onPress={onPress}
+        >
             <View style={styles.imageContainer}>
                 <Image
                     source={{ uri: data.images[0] }}
