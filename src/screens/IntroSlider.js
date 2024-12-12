@@ -13,7 +13,7 @@ const IntroSlider = ({navigation}) => {
     );
     
     const handleNavigateLogin = () => {
-        navigation.navigate("BottomTab")
+        navigation.navigate("Login")
     }
 
     return (
@@ -54,7 +54,8 @@ const styles = StyleSheet.create({
     introSliderContainer: {
         flex: 1,
         paddingBottom: 14,
-        paddingHorizontal: 14
+        paddingHorizontal: 14,
+        backgroundColor: "white"
     },
     introSliderContent: {
         flex: 1,

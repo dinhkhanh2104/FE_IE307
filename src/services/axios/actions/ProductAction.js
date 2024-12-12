@@ -5,7 +5,7 @@ export const getProducts = async () => {
     try {
         const response = await axiosInstance.get(API_ENDPOINTS.products)
         if (response.status === 200) {
-            return response.data
+            return response.data.data
         }
         else {
             throw new Error("Fail to fetch products")
@@ -45,22 +45,6 @@ export const getProductByCategory = async (category) => {
     }
     catch (error) {
         console.error("Error fetching product by category", error);
-        throw error
-    }
-}
-
-export const getCategories = async () => {
-    try {
-        const response = await axiosInstance.get(API_ENDPOINTS.category)
-        if (response.status === 200) {
-            return response.data
-        }
-        else {
-            throw new Error("Fail to fetch categories")
-        }
-    }
-    catch (error) {
-        console.error("Error fetching product categories", error);
         throw error
     }
 }
