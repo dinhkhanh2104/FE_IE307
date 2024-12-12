@@ -83,86 +83,111 @@ const Cart = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
-        {/* Header Section */}
-        <View style={styles.header}>
-          <Text style={styles.heading}>Cart</Text>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{cartItems.length}</Text>
+      <View style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          {/* Header Section */}
+          <View style={styles.header}>
+            <Text style={styles.heading}>Cart</Text>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{cartItems.length}</Text>
+            </View>
           </View>
-        </View>
 
-        {/* Shipping Address */}
-        <View style={styles.addressContainer}>
-          <Text style={styles.addressTitle}>Shipping Address</Text>
-          <View style={styles.addressRow}>
-            <Text style={styles.address}>
-              26, Duong So 2, Thao Dien Ward, An Phu, District 2, Ho Chi Minh City
-            </Text>
-            <TouchableOpacity style={styles.editIconContainer}>
-              <Ionicons name="pencil-sharp" color="#fff" size={20} />
-            </TouchableOpacity>
+          {/* Shipping Address */}
+          <View style={styles.addressContainer}>
+            <Text style={styles.addressTitle}>Shipping Address</Text>
+            <View style={styles.addressRow}>
+              <Text style={styles.address}>
+                26, Duong So 2, Thao Dien Ward, An Phu, District 2, Ho Chi Minh City
+              </Text>
+              <TouchableOpacity style={styles.editIconContainer}>
+                <Ionicons name="pencil-sharp" color="#fff" size={20} />
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
 
-        {/* Cart Items */}
-        <FlatList
-          data={cartItems}
-          renderItem={({ item }) => (
-            <View style={styles.cartItem}>
-              <Image source={{ uri: item.image }} style={styles.image} />
-              <View style={styles.itemDetails}>
-                <Text style={styles.title}>{item.title}</Text>
-                <Text style={styles.subtitle}>{`${item.color}, Size ${item.size}`}</Text>
-                <View style={styles.itemFooter}>
-                  <Text style={styles.price}>${item.price.toFixed(2)}</Text>
-                  <View style={styles.quantityControl}>
-                    <TouchableOpacity
-                      onPress={() => decrementQuantity(item.id)}
-                      style={styles.controlButtonContainer}
-                    >
-                      <Text style={styles.controlButton}>-</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.quantity}>{item.quantity}</Text>
-                    <TouchableOpacity
-                      onPress={() => incrementQuantity(item.id)}
-                      style={styles.controlButtonContainer}
-                    >
-                      <Text style={styles.controlButton}>+</Text>
-                    </TouchableOpacity>
+          {/* Cart Items */}
+          {
+             cartItems.length > 0 ? 
+             <FlatList
+            data={cartItems}
+            renderItem={({ item }) => (
+              <View style={styles.cartItem}>
+                <Image source={{ uri: item.image }} style={styles.image} />
+                <TouchableOpacity style={
+                  {
+                    position: "absolute", bottom: 10, left: 10, backgroundColor: "white", borderRadius: 999,
+                    width: 40, height: 40, justifyContent: "center", alignItems: "center"
+                  }}>
+                  <Ionicons name="trash-outline" size={26} color={COLORS.primary} />
+                </TouchableOpacity>
+                <View style={styles.itemDetails}>
+                  <Text style={styles.title}>{item.title}</Text>
+                  <Text style={styles.subtitle}>{`${item.color}, Size ${item.size}`}</Text>
+                  <View style={styles.itemFooter}>
+                    <Text style={styles.price}>${item.price.toFixed(2)}</Text>
+                    <View style={styles.quantityControl}>
+                      <TouchableOpacity
+                        onPress={() => decrementQuantity(item.id)}
+                        style={styles.controlButtonContainer}
+                      >
+                        <Text style={styles.controlButton}>-</Text>
+                      </TouchableOpacity>
+                      <Text style={styles.quantity}>{item.quantity}</Text>
+                      <TouchableOpacity
+                        onPress={() => incrementQuantity(item.id)}
+                        style={styles.controlButtonContainer}
+                      >
+                        <Text style={styles.controlButton}>+</Text>
+                      </TouchableOpacity>
+                    </View>
+                    
                   </View>
-                  <TouchableOpacity onPress={() => removeItem(item.id)}>
-                    <Ionicons name="trash-bin-outline" style={styles.deleteButton} />
-                  </TouchableOpacity>
                 </View>
               </View>
-            </View>
-          )}
-          keyExtractor={(item) => item.id}
-          style={styles.cartList}
-        />
+            )}
+            keyExtractor={(item) => item.id}
+            style={styles.cartList}
+          />  : 
+          <View style={styles.iconContainer}>
+            <Ionicons
+              name="bag-add-sharp"
+              size={80}
+              color="#004CFF"
+              style={styles.iconStyle}
+            />
+          </View>
+        
+          }
 
-        {/* Wishlist Section */}
-        <Text style={styles.sectionTitle}>From Your Wishlist</Text>
-        <FlatList
-          data={wishlistItems}
-          renderItem={({ item }) => (
-            <View style={{margin:10}}>
-              <CardWishList/>
-            </View>
-          )}
-          keyExtractor={(item) => item.id}
-          style={styles.cartList}
-        />
+          {/* Wishlist Section */}
+          <Text style={styles.sectionTitle}>From Your Wishlist</Text>
+          <FlatList
+            data={wishlistItems}
+            renderItem={({ item }) => (
+              <View style={{ margin: 16 }}>
+                <CardWishList />
+              </View>
+            )}
+            keyExtractor={(item) => item.id}
+            style={styles.cartList}
+          />
+        </ScrollView>
 
-        {/* Total and Checkout */}
+        {/* Fixed Total and Checkout */}
         <View style={styles.totalContainer}>
           <Text style={styles.totalText}>Total: ${calculateTotal()}</Text>
-          <TouchableOpacity style={styles.checkoutButton}>
-            <Text style={styles.checkoutText}>Checkout</Text>
-          </TouchableOpacity>
+          { cartItems.length > 0 ? 
+            <TouchableOpacity style={styles.checkoutButton}>
+              <Text style={styles.checkoutText}>Checkout</Text>
+            </TouchableOpacity>
+          :
+            <TouchableOpacity style={styles.checkoutButtonNone} disabled>
+              <Text style={styles.checkoutTextNone}>Checkout</Text>
+            </TouchableOpacity>
+          }
         </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };
@@ -185,10 +210,10 @@ const styles = StyleSheet.create({
   },
   badge: {
     marginLeft: 8,
-    backgroundColor: COLORS.lightGray || '#f5f5f5',
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    backgroundColor: "#E5EBFC",
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -197,7 +222,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   addressContainer: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F9F9F9',
     padding: 16,
     borderRadius: 8,
     marginHorizontal: 16,
@@ -230,20 +255,30 @@ const styles = StyleSheet.create({
   cartList: {
     marginBottom: 16,
   },
+  scrollViewContent: {
+    paddingBottom: 100, // Prevent overlap
+  },
   cartItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
     marginHorizontal: 16,
+    borderWidth: 1,  // Add border
+    borderColor: '#ddd', // Light gray border
+    borderRadius: 8, // Rounded corners
+    backgroundColor: '#fff', // Set a background color
+    shadowColor: '#000', // Shadow color
+    shadowOffset: { width: 0, height: 1 }, // Shadow direction
+    shadowOpacity: 0.1, // Shadow opacity
+    shadowRadius: 2, // Shadow radius
+    elevation: 2, // For Android shadow
+    padding:5
   },
   image: {
-    width: 130,
-    height: 120,
+    width: 160,
+    height: 150,
     borderRadius: 8,
     marginRight: 16,
-    padding:10,
-    backgroundColor:'red',
-    shadowColor:'#ccc'
   },
   itemDetails: {
     flex: 1,
@@ -288,34 +323,51 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     backgroundColor: '#E5EBFC',
-    lineHeight:32,
-    width:37,
-    textAlign:'center',
-    borderRadius:6
-  },   
+    lineHeight: 32,
+    width: 37,
+    textAlign: 'center',
+    borderRadius: 6,
+  },
   deleteButton: {
     fontSize: 20,
+    fontWeight: 700,
     color: '#D97474',
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
     marginHorizontal: 16,
     marginVertical: 8,
   },
   totalContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     padding: 16,
+    backgroundColor: '#fff',
     borderTopWidth: 1,
     borderColor: '#ccc',
     alignItems: 'center',
+    flexDirection:'row',
+    justifyContent:'space-between',
+    gap:10
   },
   totalText: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 16,
+    textAlign:'center',
+    justifyContent:'center'
   },
   checkoutButton: {
     backgroundColor: 'blue',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+  },
+  checkoutButtonNone: {
+    backgroundColor: '#fff',
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 8,
@@ -324,6 +376,30 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  checkoutTextNone: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  iconContainer: {
+    justifyContent: 'center', // Centers vertically
+    alignItems: 'center', // Centers horizontally
+    flex: 1,
+    padding:10,
+    marginVertical:80
+  },
+  iconStyle: {
+    borderRadius: 80, // Half of the size to make it circular
+    borderWidth: 0,
+    borderColor: '#ddd', // Light gray border
+    shadowColor: '#000', // Shadow color
+    shadowOffset: { width: 0, height: 4 }, // Shadow position
+    shadowOpacity: 0.3, // Shadow transparency
+    shadowRadius: 6, // Shadow blur
+    elevation: 4, // For Android shadow
+    backgroundColor: '#fff', // Background for the icon
+    padding: 40, // Optional padding for inner spacing
   },
 });
 
