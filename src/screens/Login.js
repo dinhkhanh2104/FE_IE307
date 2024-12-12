@@ -1,17 +1,24 @@
 import { Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { SIZES } from '../constants/theme'
 import InputField from '../components/InputField'
 import { COLORS } from '../constants/theme'
+import AuthContext from '../contexts/AuthContext'
+import Button from '../components/Button'
+import { login } from '../services/axios/actions/UserAction'
+
 
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Fontisto from '@expo/vector-icons/Fontisto';
-import Button from '../components/Button'
+import Spinner from 'react-native-loading-spinner-overlay'
 
 const Login = ({ navigation }) => {
 
-  const [username, setUsername] = useState()
-  const [password, setPassword] = useState()
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+
+  const {setToken} = useContext(AuthContext)
+  const [loading, setLoading] = useState(false)
 
   const handleNavigateRegister = () => {
     navigation.navigate("Register")
@@ -22,7 +29,28 @@ const Login = ({ navigation }) => {
   }
 
   const handleLogin = () => {
-    navigation.navigate("IntroSlider")
+    if (!username.trim() || !password.trim()) {
+      Alert.alert("You forgot to enter all both field 😤", "Email or password must not be empty !");
+      return;
+  }
+  try {
+      setLoading(true);
+      const response = await login(username.trim(), password.trim());
+      setToken(response.data.token);
+      Alert.alert("Hi 🫡", "We’re glad to have you here 🤗");
+      setLoading(false);
+      navigation.navigate("IntroSlider")
+  } 
+  catch (error) {
+      setLoading(false);
+      if (error.response) {
+          Alert.alert("Ohh! 😫", "Incorrect email or password :(");
+      } else {
+          Alert.alert("Error", "Network error or server not reachable.");
+      }
+      setEmailInput('');
+      setPasswordInput('');
+  }
   }
   return (
     <SafeAreaView style={styles.container}>

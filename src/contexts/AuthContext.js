@@ -1,10 +1,29 @@
-import { createContext, useState, useEffect, createElement, Children } from "react";
+import { createContext, useState } from "react";
+import { getCart } from "../services/axios/actions/CartAction";
 
 
 const AuthContext = createContext({})
 export const AuthProvider = ({children}) => {
-    const [token, setToken] = useState(true)
-    const [cart, setCart] = useState()
+    const [token, setToken] = useState('')
+    const [cart, setCart] = useState([])
+
+    useEffect(() => {
+        const fetchCart = async () => {
+            if (token) {
+                try {
+                    const decoded = jwtDecode(token);
+                    const userId = decoded.id;
+                    const response = await getCart(userId)
+                    setCart(response.products)
+                }
+                catch(err) {
+                    console.error(err);
+                }
+            }
+          
+        }
+        fetchCart()
+    }, [token]);
     
     return (
         <AuthContext.Provider
