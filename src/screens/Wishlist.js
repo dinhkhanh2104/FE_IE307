@@ -12,7 +12,10 @@ const Wishlist = () => {
       >
         <Text style={{ fontSize: 28, fontWeight: 600 }}>Wishlist</Text>
         <CardWishList />
-        <View style={{ width: 120, height: 120, borderRadius: 999, backgroundColor: "white", elevation: 2, justifyContent: "center", alignItems: "center" }}>
+        <CardWishList />
+        <CardWishList />
+        <CardWishList />
+        <View style={{ width: 120, height: 120, borderRadius: 999, backgroundColor: "white", elevation: 22, justifyContent: "center", alignItems: "center" }}>
           <Image source={require("../../assets/images/Favorites_empty.png")} style={{ width: 70, height: 70 }} />
         </View>
       </ScrollView>
