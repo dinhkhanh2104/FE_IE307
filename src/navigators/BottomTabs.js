@@ -1,12 +1,8 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { FontAwesome, AntDesign } from "@expo/vector-icons";
-import Ionicons from '@expo/vector-icons/Ionicons';
-
-import ProductDetail from "../screens/ProductDetail";
 import HomeNavigator from "./HomeNavigator"
 import Wishlist from "../screens/Wishlist";
-import Cart from "../screens/Cart";
 import Profile from "../screens/Profile";
+import CartNavigator from "./CartNavigator";
 import { Icon } from "react-native-elements";
 import { COLORS, SIZES } from "../constants/theme";
 
@@ -52,7 +48,7 @@ export default function BottomTabs() {
 
             <Tab.Screen
                 name="Cart"
-                component={Cart}
+                component={CartNavigator}
                 options={{
                     tabBarIcon: ({ focused }) => {
                         return <Icon name="shopping-cart" type="feather" size={24} color={focused ? COLORS.primary : COLORS.black} />
@@ -63,9 +59,8 @@ export default function BottomTabs() {
                 }}
             />
                 <Tab.Screen
-                    name="ProductDetail"
-                    // component={Profile}
-                    component={ProductDetail}
+                    name="Profile"
+                    component={Profile}
                     options={{
                         tabBarIcon: ({ focused }) => {
                             return <Icon name="user" type="feather" size={24} color={focused ? COLORS.primary : COLORS.black}/>
