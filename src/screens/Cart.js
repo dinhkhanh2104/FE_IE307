@@ -8,10 +8,12 @@ import {
   StyleSheet,
   ScrollView,
   SafeAreaView,
+  StatusBar
 } from 'react-native';
 import { COLORS } from '../constants/theme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import CardWishList from '../components/CardWishList';
+
 
 const Cart = ({navigation}) => {
   const [cartItems, setCartItems] = useState([
@@ -114,6 +116,7 @@ const Cart = ({navigation}) => {
           {
             cartItems.length > 0 ?
               <FlatList
+                scrollEnabled = {false}
                 data={cartItems}
                 renderItem={({ item }) => (
                   <View style={styles.cartItem}>
@@ -201,7 +204,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: 16,
+    paddingTop: StatusBar.currentHeight + 5 || 0,
   },
   header: {
     flexDirection: 'row',
