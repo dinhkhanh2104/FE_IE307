@@ -7,23 +7,23 @@ const AuthContext = createContext({})
 export const AuthProvider = ({children}) => {
     const [token, setToken] = useState('')
     const [cart, setCart] = useState([])
+    const fetchCart = async () => {
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+                const userId = decoded.id;
+                const response = await getCart(userId)
+                setCart(response)
+            }
+            catch(err) {
+                console.error(err);
+            }
+        }
+      
+    }
 
     useEffect(() => {
-        const fetchCart = async () => {
-            if (token) {
-                try {
-                    const decoded = jwtDecode(token);
-                    const userId = decoded.id;
-                    const response = await getCart(userId)
-                    setCart(response)
-                    console.log(response)
-                }
-                catch(err) {
-                    console.error(err);
-                }
-            }
-          
-        }
+       
         fetchCart()
     }, [token]);
     
@@ -31,7 +31,7 @@ export const AuthProvider = ({children}) => {
 
     return (
         <AuthContext.Provider
-            value={{token, setToken, cart, setCart}}
+            value={{token, setToken, cart, setCart,fetchCart}}
         >
             {children}
         </AuthContext.Provider>
