@@ -13,7 +13,7 @@ FlatList,
 import { COLORS, SIZES } from '../constants/theme';
 import { Icon } from 'react-native-elements';
 import Toast from 'react-native-toast-message';
-import { addToCard } from '../services/axios/actions/CartAction';
+import { addToCart } from '../services/axios/actions/CartAction';
 
 import { createNativeWrapper } from 'react-native-gesture-handler';
 
@@ -72,15 +72,15 @@ const ProductDetail = ({ route, navigation }) => {
 
   const handleAddToCart = async () => {
     try {
-      const response = await addToCard(selectedItem.sku, product._id)
-      console.log(selectedItem.sku, product.id);
+      const response = await addToCart(selectedItem.sku, product._id)
+      console.log(response);
       
       Toast.show({ type: 'success', text1: "Add to cart successfully" });
     }
     catch (error) {
       console.error("Error", error);
       Toast.show({ type: 'error', text1: "Add to cart failed. Please try again." });
-  }
+    }
   }
 
   return (
