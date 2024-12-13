@@ -41,9 +41,7 @@ const Login = ({ navigation }) => {
         text2: "We’re glad to have you here 🤗",
       });
       
-      await AsyncStorage.setItem('userToken', response.data.token); // Save the token with a key 
-      const token = await AsyncStorage.getItem('userToken'); // Retrieve the token
-      console.log(token,'ádfádfds')
+      await AsyncStorage.setItem('userToken', response.data.token); 
       setTimeout(() => {
         setToken(response.data.token);
       }, 2000);

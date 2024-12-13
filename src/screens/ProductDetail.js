@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   Text,
@@ -16,9 +16,11 @@ import Toast from 'react-native-toast-message';
 import { addToCart } from '../services/axios/actions/CartAction';
 
 import { createNativeWrapper } from 'react-native-gesture-handler';
+import AuthContext from '../contexts/AuthContext';
 
 
 const ProductDetail = ({ route, navigation }) => {
+  const { fetchCart } = useContext(AuthContext)
 
   const { product } = route.params
 
@@ -74,7 +76,9 @@ const ProductDetail = ({ route, navigation }) => {
     try {
       const response = await addToCart(selectedItem.sku, product._id)
       console.log(response);
-      
+
+      fetchCart();
+
       Toast.show({ type: 'success', text1: "Add to cart successfully" });
     }
     catch (error) {
