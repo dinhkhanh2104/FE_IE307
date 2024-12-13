@@ -1,13 +1,27 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axiosInstance from "../axiosInstance";
 import { API_ENDPOINTS } from "../endpoints";
 
 
 export const getCart = async (id) => {
     try {
-        const response = await axiosInstance.get(API_ENDPOINTS.cart + id)
+        const token = await AsyncStorage.getItem('userToken');
+        if (!token) {
+            throw new Error('User token is not available');
+        }
+
+        const response = await fetch('https://ie-307-6017b574900a.herokuapp.com/cart', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+           
+        });
         if (response.status === 200)
-        {
-            return response.data
+        {   
+            const data = await response.json();
+            return data.cart.items
         }
         else {
             throw new Error("Fail to fetch cart")
@@ -22,8 +36,39 @@ export const getCart = async (id) => {
     // return axiosInstance.get(API_ENDPOINTS.userCart + id)
 }
 
-export const addToCard = async (sku, id) => {
-    console.log(sku, id)
-    return axiosInstance.post(API_ENDPOINTS.addCart, {sku, quantity: 1, id})
-}
+export const addToCart = async (sku, id) => {
+    try {
+        console.log(`Adding to cart - SKU: ${sku}, ID: ${id}`);
 
+        const token = await AsyncStorage.getItem('userToken');
+        if (!token) {
+            throw new Error('User token is not available');
+        }
+        
+   
+
+        const response = await fetch('https://ie-307-6017b574900a.herokuapp.com/cart/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                "sku": sku,
+                "productId": id,
+                "quantity": 1,
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Failed to add to cart: ${errorData.message || response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error in addToCart:', error);
+        throw error; // Rethrow error for further handling
+    }
+};
