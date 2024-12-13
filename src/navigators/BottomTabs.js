@@ -5,10 +5,15 @@ import Profile from "../screens/Profile";
 import CartNavigator from "./CartNavigator";
 import { Icon } from "react-native-elements";
 import { COLORS, SIZES } from "../constants/theme";
+import { useContext } from "react";
+import AuthContext from "../contexts/AuthContext";
 
 const Tab = createBottomTabNavigator()
 
 export default function BottomTabs() {
+
+    const {cart} = useContext(AuthContext)
+
     return (
         <Tab.Navigator
             initialRouteName="Home"
