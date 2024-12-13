@@ -15,7 +15,8 @@ export const AuthProvider = ({children}) => {
                     const decoded = jwtDecode(token);
                     const userId = decoded.id;
                     const response = await getCart(userId)
-                    setCart(response.products)
+                    setCart(response)
+                    console.log(response)
                 }
                 catch(err) {
                     console.error(err);
@@ -26,6 +27,8 @@ export const AuthProvider = ({children}) => {
         fetchCart()
     }, [token]);
     
+
+
     return (
         <AuthContext.Provider
             value={{token, setToken, cart, setCart}}

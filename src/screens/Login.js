@@ -7,6 +7,7 @@ import AuthContext from '../contexts/AuthContext';
 import Button from '../components/Button';
 import { login } from '../services/axios/actions/UserAction';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Fontisto from '@expo/vector-icons/Fontisto';
@@ -39,15 +40,15 @@ const Login = ({ navigation }) => {
         text1: "Welcome back!",
         text2: "We’re glad to have you here 🤗",
       });
+      
+      await AsyncStorage.setItem('userToken', response.data.token); // Save the token with a key 
+      const token = await AsyncStorage.getItem('userToken'); // Retrieve the token
+      console.log(token,'ádfádfds')
       setTimeout(() => {
         setToken(response.data.token);
       }, 2000);
     } catch (error) {
-      const message = error.response ? "Incorrect email or password!" : "Network error or server not reachable.";
-      Toast.show({
-        type: 'error',
-        text1: message
-      });
+      console.log(error)
       setEmail('');
       setPassword('');
     }
