@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   Text,
@@ -13,29 +13,13 @@ import {
 import { COLORS } from '../constants/theme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import CardWishList from '../components/CardWishList';
+import AuthContext from '../contexts/AuthContext';
+import formatCurrency from '../../utils/formatCurrency';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
-const Cart = ({navigation}) => {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: '1',
-      image: 'https://via.placeholder.com/80',
-      title: 'Lorem ipsum dolor sit amet consectetuer.',
-      price: 17.0,
-      quantity: 1,
-      size: 'M',
-      color: 'Pink',
-    },
-    {
-      id: '2',
-      image: 'https://via.placeholder.com/80',
-      title: 'Lorem ipsum dolor sit amet consectetuer.',
-      price: 17.0,
-      quantity: 1,
-      size: 'M',
-      color: 'Pink',
-    },
-  ]);
+const Cart = ({ navigation }) => {
+  const { cart, setCart } = useContext(AuthContext); // Access cart from context and setCart to update it
+  const [cartItems, setCartItems] = useState(cart); // Local state to manage UI
 
   const [wishlistItems] = useState([
     {
@@ -56,37 +40,107 @@ const Cart = ({navigation}) => {
     },
   ]);
 
-  const incrementQuantity = (itemId) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId ? { ...item, quantity: item.quantity + 1 } : item
-      )
+  // Update the cart on the server
+  const updateCart = async (sku, quantity, productId) => {
+    const token = await AsyncStorage.getItem('userToken');
+    try {
+      console.log({ sku, quantity, productId });
+      const response = await fetch('https://ie-307-6017b574900a.herokuapp.com/cart/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          sku,
+          quantity,
+          productId,
+        }),
+      });
+
+      console.log(response)
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Cart updated:', data);
+        console.log(data.cart.items)
+        // Update the local cart state only after successful server update
+        setCart(data.cart.items);
+        
+        setCartItems(data.cart.items);  // Update cart items locally for UI
+      } else {
+        console.error('Failed to update cart:', response);
+      }
+    } catch (error) {
+      console.error('Error updating cart:', error);
+    }
+  };
+
+  const delCart = async (sku, productId) => {
+    const token = await AsyncStorage.getItem('userToken');
+    try {
+      const response = await fetch('https://ie-307-6017b574900a.herokuapp.com/cart/remove', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          sku,
+          productId,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Item removed from cart:', data);
+
+        // Update the local cart state after successful deletion
+        setCart(data.cart);
+        setCartItems(data.cart.items);  // Update cart items locally for UI
+      } else {
+        console.error('Failed to remove item:', response);
+      }
+    } catch (error) {
+      console.error('Error removing item:', error);
+    }
+  };
+
+  // Increment Quantity
+  const incrementQuantity = async (productId, itemId) => {
+    const updatedCartItems = cartItems.map((item) =>
+      item.variation.sku === itemId
+        ? { ...item, quantity: item.quantity + 1 }
+        : item
     );
+
+    const updatedItem = updatedCartItems.find((item) => item.variation.sku === itemId);
+    await updateCart(itemId, updatedItem.quantity, productId); // Update the cart on the server
   };
 
-  const decrementQuantity = (itemId) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId && item.quantity > 1
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
+  // Decrement Quantity
+  const decrementQuantity = async (productId, itemId) => {
+    const updatedCartItems = cartItems.map((item) =>
+      item.variation.sku === itemId && item.quantity > 1
+        ? { ...item, quantity: item.quantity - 1 }
+        : item
     );
+
+    setCartItems(updatedCartItems); // Update local cart state immediately
+
+    const updatedItem = updatedCartItems.find((item) => item.variation.sku === itemId);
+    await updateCart(itemId, updatedItem.quantity, productId); // Update the cart on the server
   };
 
-  const removeItem = (itemId) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== itemId));
-  };
-
-  const handleNavigateCheckOut = () => {
-    navigation.navigate("CheckOut")
-  }
+  // Calculate Total Price
   const calculateTotal = () =>
-    cartItems
-      .reduce((sum, item) => sum + item.price * item.quantity, 0)
-      .toFixed(2);
+    cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
 
-  
+  // Navigate to Checkout
+  const handleNavigateCheckOut = () => {
+    navigation.navigate('CheckOut');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ flex: 1 }}>
@@ -113,64 +167,68 @@ const Cart = ({navigation}) => {
           </View>
 
           {/* Cart Items */}
-          {
-            cartItems.length > 0 ?
-              <FlatList
-                scrollEnabled = {false}
-                data={cartItems}
-                renderItem={({ item }) => (
-                  <View style={styles.cartItem}>
-                    <Image source={{ uri: item.image }} style={styles.image} />
-                    <TouchableOpacity style={
-                      {
-                        position: "absolute", bottom: 10, left: 10, backgroundColor: "white", borderRadius: 999,
-                        width: 40, height: 40, justifyContent: "center", alignItems: "center"
-                      }}>
-                      <Ionicons name="trash-outline" size={26} color={COLORS.primary} />
-                    </TouchableOpacity>
-                    <View style={styles.itemDetails}>
-                      <Text style={styles.title}>{item.title}</Text>
-                      <Text style={styles.subtitle}>{`${item.color}, Size ${item.size}`}</Text>
-                      <View style={styles.itemFooter}>
-                        <Text style={styles.price}>${item.price.toFixed(2)}</Text>
-                        <View style={styles.quantityControl}>
-                          <TouchableOpacity
-                            onPress={() => decrementQuantity(item.id)}
-                            style={styles.controlButtonContainer}
-                          >
-                            <Text style={styles.controlButton}>-</Text>
-                          </TouchableOpacity>
-                          <Text style={styles.quantity}>{item.quantity}</Text>
-                          <TouchableOpacity
-                            onPress={() => incrementQuantity(item.id)}
-                            style={styles.controlButtonContainer}
-                          >
-                            <Text style={styles.controlButton}>+</Text>
-                          </TouchableOpacity>
-                        </View>
-
+          {cartItems.length > 0 ? (
+            <FlatList
+              scrollEnabled={false}
+              data={cartItems}
+              renderItem={({ item }) => (
+                <View style={styles.cartItem}>
+                  <Image source={{ uri: item.variation.images[0] }} style={styles.image} />
+                  <TouchableOpacity
+                    onPress={() => delCart(item.variation.sku, item.productId)} // Remove item
+                    style={{
+                      position: 'absolute',
+                      bottom: 10,
+                      left: 10,
+                      backgroundColor: 'white',
+                      borderRadius: 999,
+                      width: 40,
+                      height: 40,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Ionicons name="trash-outline" size={26} color={COLORS.primary} />
+                  </TouchableOpacity>
+                  <View style={styles.itemDetails}>
+                    <Text style={styles.title}>{item.productName}</Text>
+                    <Text style={styles.subtitle}>
+                      {`Color: ${item.variation.attributes[0].values[0]}`}
+                    </Text>
+                    <View style={styles.itemFooter}>
+                      <Text style={styles.price}>{formatCurrency(item.price)}</Text>
+                      <View style={styles.quantityControl}>
+                        <TouchableOpacity
+                          onPress={() => decrementQuantity(item.productId, item.variation.sku)}
+                          style={styles.controlButtonContainer}
+                        >
+                          <Text style={styles.controlButton}>-</Text>
+                        </TouchableOpacity>
+                        <Text style={styles.quantity}>{item.quantity}</Text>
+                        <TouchableOpacity
+                          onPress={() => incrementQuantity(item.productId, item.variation.sku)}
+                          style={styles.controlButtonContainer}
+                        >
+                          <Text style={styles.controlButton}>+</Text>
+                        </TouchableOpacity>
                       </View>
                     </View>
                   </View>
-                )}
-                keyExtractor={(item) => item.id}
-                style={styles.cartList}
-              /> :
-              <View style={styles.iconContainer}>
-                <Ionicons
-                  name="bag-add-sharp"
-                  size={80}
-                  color="#004CFF"
-                  style={styles.iconStyle}
-                />
-              </View>
-
-          }
+                </View>
+              )}
+              keyExtractor={(item) => item.variation.sku}
+              style={styles.cartList}
+            />
+          ) : (
+            <View style={styles.iconContainer}>
+              <Ionicons name="bag-add-sharp" size={80} color="#004CFF" style={styles.iconStyle} />
+            </View>
+          )}
 
           {/* Wishlist Section */}
           <Text style={styles.sectionTitle}>From Your Wishlist</Text>
           <FlatList
-            scrollEnabled = {false}
+            scrollEnabled={false}
             data={wishlistItems}
             renderItem={({ item }) => (
               <View style={{ margin: 16 }}>
@@ -185,15 +243,15 @@ const Cart = ({navigation}) => {
         {/* Fixed Total and Checkout */}
         <View style={styles.totalContainer}>
           <Text style={styles.totalText}>Total: ${calculateTotal()}</Text>
-          {cartItems.length > 0 ?
+          {cartItems.length > 0 ? (
             <TouchableOpacity style={styles.checkoutButton} onPress={handleNavigateCheckOut}>
               <Text style={styles.checkoutText}>Checkout</Text>
             </TouchableOpacity>
-            :
+          ) : (
             <TouchableOpacity style={styles.checkoutButtonNone} disabled>
               <Text style={styles.checkoutTextNone}>Checkout</Text>
             </TouchableOpacity>
-          }
+          )}
         </View>
       </View>
     </SafeAreaView>
@@ -218,7 +276,7 @@ const styles = StyleSheet.create({
   },
   badge: {
     marginLeft: 8,
-    backgroundColor: "#E5EBFC",
+    backgroundColor: '#E5EBFC',
     width: 30,
     height: 30,
     borderRadius: 15,
@@ -271,16 +329,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
     marginHorizontal: 16,
-    borderWidth: 1,  // Add border
-    borderColor: '#ddd', // Light gray border
-    borderRadius: 8, // Rounded corners
-    backgroundColor: '#fff', // Set a background color
-    shadowColor: '#000', // Shadow color
-    shadowOffset: { width: 0, height: 1 }, // Shadow direction
-    shadowOpacity: 0.1, // Shadow opacity
-    shadowRadius: 2, // Shadow radius
-    elevation: 2, // For Android shadow
-    padding: 5
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    padding: 5,
   },
   image: {
     width: 160,
@@ -359,14 +417,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 10
+    gap: 10,
   },
   totalText: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 16,
     textAlign: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   checkoutButton: {
     backgroundColor: 'blue',
@@ -391,23 +449,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   iconContainer: {
-    justifyContent: 'center', // Centers vertically
-    alignItems: 'center', // Centers horizontally
+    justifyContent: 'center',
+    alignItems: 'center',
     flex: 1,
     padding: 10,
-    marginVertical: 80
+    marginVertical: 80,
   },
   iconStyle: {
-    borderRadius: 80, // Half of the size to make it circular
+    borderRadius: 80,
     borderWidth: 0,
-    borderColor: '#ddd', // Light gray border
-    shadowColor: '#000', // Shadow color
-    shadowOffset: { width: 0, height: 4 }, // Shadow position
-    shadowOpacity: 0.3, // Shadow transparency
-    shadowRadius: 6, // Shadow blur
-    elevation: 4, // For Android shadow
-    backgroundColor: '#fff', // Background for the icon
-    padding: 40, // Optional padding for inner spacing
+    borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
+    backgroundColor: '#fff',
+    padding: 40,
   },
 });
 

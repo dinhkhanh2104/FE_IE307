@@ -16,7 +16,6 @@ export const AuthProvider = ({children}) => {
                     const userId = decoded.id;
                     const response = await getCart(userId)
                     setCart(response)
-                    console.log(response)
                 }
                 catch(err) {
                     console.error(err);
