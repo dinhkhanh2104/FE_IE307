@@ -2,7 +2,6 @@ import { SafeAreaView, ScrollView, StyleSheet, Text, View, StatusBar, Image } fr
 import React from 'react'
 import CardWishList from '../components/CardWishList'
 
-
 const Wishlist = () => {
   return (
     <SafeAreaView style={styles.container}>
@@ -34,5 +33,6 @@ const styles = StyleSheet.create({
   wrapper: {
     paddingHorizontal: 20,
     paddingBottom: 30,
+    alignItems: "center",
   }
 })
