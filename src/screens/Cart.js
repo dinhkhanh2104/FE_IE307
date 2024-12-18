@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   StyleSheet,
   ScrollView,
   SafeAreaView,
-  StatusBar
+  StatusBar,
 } from 'react-native';
 import { COLORS } from '../constants/theme';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -20,6 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const Cart = ({ navigation }) => {
   const { cart, setCart } = useContext(AuthContext); // Access cart from context and setCart to update it
   const [cartItems, setCartItems] = useState(cart); // Local state to manage UI
+  const [selectedItems, setSelectedItems] = useState(new Set()); // Track selected items
 
   const [wishlistItems] = useState([
     {
@@ -44,7 +45,6 @@ const Cart = ({ navigation }) => {
   const updateCart = async (sku, quantity, productId) => {
     const token = await AsyncStorage.getItem('userToken');
     try {
-      console.log({ sku, quantity, productId });
       const response = await fetch('https://ie-307-6017b574900a.herokuapp.com/cart/update', {
         method: 'POST',
         headers: {
@@ -58,15 +58,9 @@ const Cart = ({ navigation }) => {
         }),
       });
 
-      console.log(response)
-
       if (response.ok) {
         const data = await response.json();
-        console.log('Cart updated:', data);
-        console.log(data.cart.items)
-        // Update the local cart state only after successful server update
         setCart(data.cart.items);
-        
         setCartItems(data.cart.items);  // Update cart items locally for UI
       } else {
         console.error('Failed to update cart:', response);
@@ -93,9 +87,6 @@ const Cart = ({ navigation }) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Item removed from cart:', data);
-
-        // Update the local cart state after successful deletion
         setCart(data.cart);
         setCartItems(data.cart.items);  // Update cart items locally for UI
       } else {
@@ -132,13 +123,28 @@ const Cart = ({ navigation }) => {
     await updateCart(itemId, updatedItem.quantity, productId); // Update the cart on the server
   };
 
-  // Calculate Total Price
-  const calculateTotal = () =>
-    cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
+  // Toggle selection for cart item
+  const toggleSelection = (sku) => {
+    const newSelectedItems = new Set(selectedItems);
+    if (newSelectedItems.has(sku)) {
+      newSelectedItems.delete(sku);
+    } else {
+      newSelectedItems.add(sku);
+    }
+    setSelectedItems(newSelectedItems);
+  };
 
-  // Navigate to Checkout
+  // Calculate Total Price for selected items
+  const calculateTotal = () =>
+    cartItems
+      .filter(item => selectedItems.has(item.variation.sku))
+      .reduce((sum, item) => sum + item.price * item.quantity, 0)
+      .toFixed(2);
+
+  // Navigate to Checkout with selected items
   const handleNavigateCheckOut = () => {
-    navigation.navigate('CheckOut');
+    const selectedCartItems = cartItems.filter(item => selectedItems.has(item.variation.sku));
+    navigation.navigate('CheckOut', { selectedCartItems });
   };
 
   return (
@@ -150,19 +156,6 @@ const Cart = ({ navigation }) => {
             <Text style={styles.heading}>Cart</Text>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{cartItems.length}</Text>
-            </View>
-          </View>
-
-          {/* Shipping Address */}
-          <View style={styles.addressContainer}>
-            <Text style={styles.addressTitle}>Shipping Address</Text>
-            <View style={styles.addressRow}>
-              <Text style={styles.address}>
-                26, Duong So 2, Thao Dien Ward, An Phu, District 2, Ho Chi Minh City
-              </Text>
-              <TouchableOpacity style={styles.editIconContainer}>
-                <Ionicons name="pencil-sharp" color="#fff" size={20} />
-              </TouchableOpacity>
             </View>
           </View>
 
@@ -214,6 +207,16 @@ const Cart = ({ navigation }) => {
                       </View>
                     </View>
                   </View>
+                  <TouchableOpacity
+                    style={styles.selectionButton}
+                    onPress={() => toggleSelection(item.variation.sku)}
+                  >
+                    <Ionicons
+                      name={selectedItems.has(item.variation.sku) ? "checkbox" : "checkbox-outline"}
+                      size={24}
+                      color={COLORS.primary}
+                    />
+                  </TouchableOpacity>
                 </View>
               )}
               keyExtractor={(item) => item.variation.sku}
@@ -243,7 +246,7 @@ const Cart = ({ navigation }) => {
         {/* Fixed Total and Checkout */}
         <View style={styles.totalContainer}>
           <Text style={styles.totalText}>Total: ${calculateTotal()}</Text>
-          {cartItems.length > 0 ? (
+          {selectedItems.size > 0 ? (
             <TouchableOpacity style={styles.checkoutButton} onPress={handleNavigateCheckOut}>
               <Text style={styles.checkoutText}>Checkout</Text>
             </TouchableOpacity>

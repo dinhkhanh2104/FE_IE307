@@ -3,7 +3,7 @@ import axiosInstance from "../axiosInstance";
 import { API_ENDPOINTS } from "../endpoints";
 
 
-export const getCart = async (id) => {
+export const getCart = async () => {
     try {
         const token = await AsyncStorage.getItem('userToken');
         if (!token) {
@@ -45,8 +45,6 @@ export const addToCart = async (sku, id) => {
             throw new Error('User token is not available');
         }
         
-   
-
         const response = await fetch('https://ie-307-6017b574900a.herokuapp.com/cart/add', {
             method: 'POST',
             headers: {

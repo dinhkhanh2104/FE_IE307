@@ -15,7 +15,6 @@ import { Icon } from 'react-native-elements';
 import Toast from 'react-native-toast-message';
 import { addToCart } from '../services/axios/actions/CartAction';
 
-import { createNativeWrapper } from 'react-native-gesture-handler';
 import AuthContext from '../contexts/AuthContext';
 
 
@@ -77,9 +76,11 @@ const ProductDetail = ({ route, navigation }) => {
       const response = await addToCart(selectedItem.sku, product._id)
       console.log(response);
 
-      fetchCart();
+      await fetchCart()
 
-      Toast.show({ type: 'success', text1: "Add to cart successfully" });
+      console.log('123')
+
+      alert({ type: 'success', text1: "Add to cart successfully" });
     }
     catch (error) {
       console.error("Error", error);
