@@ -16,6 +16,7 @@ import CardWishList from '../components/CardWishList';
 import AuthContext from '../contexts/AuthContext';
 import formatCurrency from '../../utils/formatCurrency';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 const Cart = ({ navigation }) => {
   const { cart, setCart } = useContext(AuthContext); // Access cart from context and setCart to update it
@@ -221,7 +222,7 @@ const Cart = ({ navigation }) => {
             />
           ) : (
             <View style={styles.iconContainer}>
-              <Ionicons name="bag-add-sharp" size={80} color="#004CFF" style={styles.iconStyle} />
+              <Ionicons name="bag-add-sharp" size={80} color={COLORS.primary} style={styles.iconStyle} />
             </View>
           )}
 
@@ -309,7 +310,7 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   editIconContainer: {
-    backgroundColor: '#004BFE',
+    backgroundColor: COLORS.primary,
     borderRadius: 17.5,
     padding: 5,
     width: 35,
@@ -427,13 +428,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   checkoutButton: {
-    backgroundColor: 'blue',
+    backgroundColor: COLORS.primary,
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 8,
   },
   checkoutButtonNone: {
-    backgroundColor: '#fff',
+    backgroundColor: '#ccc',
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 8,

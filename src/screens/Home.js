@@ -11,26 +11,67 @@ import Card from '../components/Card'
 import { getProducts } from '../services/axios/actions/ProductAction'
 import Spinner from 'react-native-loading-spinner-overlay'
 import { getCategories } from '../services/axios/actions/Categories'
+import { useContext } from "react";
+import AuthContext from "../contexts/AuthContext";
+
 
 
 const Home = ({ navigation }) => {
 
+  const { cart } = useContext(AuthContext)
+
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
-
-  const [loading, setLoading] = useState(true)
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef(null);
 
+  const [loading, setLoading] = useState(false)
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const scrollViewRef = useRef(null);
+
+
+
   const handleScroll = (event) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / SIZES.width);
     setCurrentIndex(index);
+
   };
 
-  const directProductDetail = (product) => {
-    navigation.navigate('ProductDetail', {product})
+  const handleScrollTop = (event) => {
+    const yOffset = event.nativeEvent.contentOffset.y;
+    setShowScrollToTop(yOffset > 250);
   }
+
+  const handleNavigateCart = () => {
+    navigation.navigate('CartNavigator')
+  }
+
+  const directProductDetail = (product) => {
+    navigation.navigate('ProductDetail', { product })
+  }
+
+  const initialTime = 22 * 60 * 60 + 55 * 60 + 20;
+
+  const [timeRemaining, setTimeRemaining] = useState(initialTime);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeRemaining((prevTime) => {
+        if (prevTime <= 0) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval); 
+  }, []);
+
+  const hours = Math.floor(timeRemaining / 3600);
+  const minutes = Math.floor((timeRemaining % 3600) / 60);
+  const seconds = timeRemaining % 60;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,6 +101,9 @@ const Home = ({ navigation }) => {
       <ScrollView
         contentContainerStyle={styles.wrapper}
         showsVerticalScrollIndicator={false}
+        ref={scrollViewRef}
+        onScroll={handleScrollTop}
+        scrollEventThrottle={16}
       >
         <View style={styles.header}>
           <View style={styles.iconWrapper}>
@@ -69,10 +113,19 @@ const Home = ({ navigation }) => {
             source={require("../../assets/images/logo_home.png")}
             style={{ width: 140, height: 40 }}
           />
-          <Image
+          {/* <Image
             source={require("../../assets/images/default_avatar.jpg")}
             style={{ width: 50, height: 50, borderRadius: 999 }}
-          />
+          /> */}
+          <TouchableOpacity onPress={handleNavigateCart} style={styles.cartIconWrapper}>
+            <Icon name="shopping-cart" type="feather" size={26} color={COLORS.primary} />
+            {cart.length >= 0 && (
+              <View style={styles.customBadge}>
+                <Text style={styles.badgeText}>{cart.length}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
         </View>
 
         <View style={styles.inputField}>
@@ -117,7 +170,7 @@ const Home = ({ navigation }) => {
           horizontal
         >
           {
-            categories.map((item, index) => {            
+            categories.map((item, index) => {
               return (
                 <TouchableOpacity
                   key={index}
@@ -125,10 +178,10 @@ const Home = ({ navigation }) => {
                   onPress={() => handleChooseCategory()}
                 >
                   <Image
-                    source={{uri: item.image}}
+                    source={{ uri: item.image }}
                     style={styles.categoryImage}
                   />
-                  <Text style = {{fontWeight: "500"}}>{item.name}</Text>
+                  <Text style={{ fontWeight: "500" }}>{item.name}</Text>
                 </TouchableOpacity>
               )
             })
@@ -166,7 +219,9 @@ const Home = ({ navigation }) => {
             <Text style={styles.dealText}>Deal of the Day</Text>
             <View style={styles.dealTime}>
               <Icon name='alarm' type='MaterialCommunityIcons' size={24} color={COLORS.white} />
-              <Text style={{ color: COLORS.white }}>22h 55m 20s remaining</Text>
+              <Text style={{ color: COLORS.white }}>
+                {`${hours}h ${minutes}m ${seconds}s remaining`}
+              </Text>
             </View>
           </View>
 
@@ -247,6 +302,16 @@ const Home = ({ navigation }) => {
         </View>
 
       </ScrollView>
+
+      {showScrollToTop && (
+        <TouchableOpacity
+          style={styles.scrollToTopButton}
+          onPress={() => scrollViewRef.current?.scrollTo({ animated: true, y: 0 })}
+        >
+          <Icon name="arrow-up" type="feather" size={24} color="#fff" />
+        </TouchableOpacity>
+      )}
+
 
     </SafeAreaView>
 
@@ -404,6 +469,43 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: SIZES.font14,
     fontFamily: "Montserrat_600SemiBold"
+  },
+  cartIconWrapper: {
+    width: 56,
+    height: 56,
+    borderRadius: 999,
+    backgroundColor: "white",
+    justifyContent: 'center',
+    alignItems: "center",
+    elevation: 2,
+  },
+
+  customBadge: {
+    position: 'absolute',
+    top: 10,
+    right: 8,
+    backgroundColor: 'red',
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  scrollToTopButton: {
+    position: "absolute",
+    right: 20,
+    bottom: 20,
+    backgroundColor: "#FF6347",
+    backgroundColor: COLORS.primary,
+    opacity: 0.9,
+    padding: 12,
+    borderRadius: 30,
+    elevation: 5,
   },
 
 })

@@ -212,10 +212,12 @@ const Checkout = () => {
 
 const styles = StyleSheet.create({
   container: {
+    borderWidth: 2,
+    borderColor: "red",
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: 'white',
     paddingHorizontal: 16,
-    marginTop: StatusBar.currentHeight
+    paddingTop: StatusBar.currentHeight
   },
   section: {
     backgroundColor: '#fff',
