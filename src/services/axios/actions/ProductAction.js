@@ -35,7 +35,9 @@ export const getProductDetail = async (id) => {
 
 export const getProductByCategory = async (category) => {
     try {
-        const response = await axiosInstance.get(API_ENDPOINTS.productsByCategory + category)
+        const response = await axiosInstance.get(`${API_ENDPOINTS.products}/${category}/findByCate`)
+        console.log(`${API_ENDPOINTS.products}/${category}/findByCate`);
+        
         if (response.status === 200) {
             return response.data
         }
