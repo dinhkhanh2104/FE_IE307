@@ -5,10 +5,15 @@ import Profile from "../screens/Profile";
 import CartNavigator from "./CartNavigator";
 import { Icon } from "react-native-elements";
 import { COLORS, SIZES } from "../constants/theme";
+import WishlistNavigator from "./WishlistNavigator";
+import CategoriesNavigator from "./CategoriesNavigator";
+import Feather from '@expo/vector-icons/Feather';
+
 
 const Tab = createBottomTabNavigator()
 
 export default function BottomTabs() {
+
     return (
         <Tab.Navigator
             initialRouteName="Home"
@@ -37,7 +42,7 @@ export default function BottomTabs() {
             />
             <Tab.Screen
                 name="Wishlist"
-                component={Wishlist}
+                component={WishlistNavigator}
                 options={{
                     tabBarIcon: ({ focused }) => {
                         return <Icon name="heart" type="octicon" size={24} color={focused ? COLORS.primary : COLORS.black}/>
@@ -47,13 +52,12 @@ export default function BottomTabs() {
             />
 
             <Tab.Screen
-                name="Cart"
-                component={CartNavigator}
+                name="Categories"
+                component={CategoriesNavigator}
                 options={{
                     tabBarIcon: ({ focused }) => {
-                        return <Icon name="shopping-cart" type="feather" size={24} color={focused ? COLORS.primary : COLORS.black} />
+                        return <Feather name="grid" size={24} color={focused ? COLORS.primary : COLORS.black} /> 
                     },
-                    tabBarBadge: 3,
                     headerShown: false
                     
                 }}

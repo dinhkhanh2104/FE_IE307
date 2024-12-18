@@ -1,10 +1,10 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
   View,
   Text,
   Image,
   StyleSheet,
-FlatList,
+  FlatList,
   TouchableOpacity,
   ScrollView,
   StatusBar,
@@ -16,9 +16,37 @@ import Toast from 'react-native-toast-message';
 import { addToCart } from '../services/axios/actions/CartAction';
 
 import AuthContext from '../contexts/AuthContext';
+import { getProductByCategory } from '../services/axios/actions/ProductAction';
 
 
 const ProductDetail = ({ route, navigation }) => {
+
+  const [relatedProducts, setRelatedProducts] = useState([])
+
+  useEffect(() => {
+    navigation.getParent()?.setOptions({
+      tabBarStyle: { display: 'none' },
+    });
+    return () => {
+      navigation.getParent()?.setOptions({
+        tabBarStyle: undefined,
+      });
+    };
+  }, [navigation]);
+
+  useEffect(() => {
+    const fetchRelatedProduct = async () => {
+      try {
+        const data = await getProductByCategory(product.category)
+        setRelatedProducts(data)
+      }
+      catch (error) {
+        console.error(error)
+      }
+    }
+    fetchRelatedProduct()
+  }, []);
+
   const { fetchCart } = useContext(AuthContext)
 
   const { product } = route.params
@@ -36,19 +64,16 @@ const ProductDetail = ({ route, navigation }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedPrice, setSelectedPrice] = useState(price);
   const [selectedItem, setSelectedItem] = useState()
+  const [showReviews, setShowReviews] = useState(false)
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND',
+      style: 'currency',
+      currency: 'VND',
     }).format(amount);
-};
+  };
 
-  const relatedItems = [
-    { id: 1, title: 'Item 1', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/32b2/fed3/dd6e97ca36cbcbf5ca57596f7c6547d3?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=cMvCxnGq5IAD7O4TkGF6K30c0Xv8QNdC3CwdnW2Xagf37NzAxgGHXhr8CSQtgN26DLS9Oili5YHq9sa1c9hm78aWj7mV6PF4tIji2nj5U7PvgmkUaNd48yRMCD81pjA56Wb30~Rtxk22rsQxlgZOvMi9l9yK8EG9dKaQaFy0oIvxQIJhZFjHruWOSR-BRl~JOUPrbxLpguj-8~E1e11ykUWKDsCUIxAmy5Ngo0MGba2pAljqFpf5ZCv3cg4-MWTCwALie-kVsIDRnmQrZYtekWmljesj5IAHfDUVBa6nVCHINUrm0zsvAj0weYIeSm~kFd5OcLj84hkuIKbfC3nksQ__' } },
-    { id: 2, title: 'Item 2', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/32b2/fed3/dd6e97ca36cbcbf5ca57596f7c6547d3?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=cMvCxnGq5IAD7O4TkGF6K30c0Xv8QNdC3CwdnW2Xagf37NzAxgGHXhr8CSQtgN26DLS9Oili5YHq9sa1c9hm78aWj7mV6PF4tIji2nj5U7PvgmkUaNd48yRMCD81pjA56Wb30~Rtxk22rsQxlgZOvMi9l9yK8EG9dKaQaFy0oIvxQIJhZFjHruWOSR-BRl~JOUPrbxLpguj-8~E1e11ykUWKDsCUIxAmy5Ngo0MGba2pAljqFpf5ZCv3cg4-MWTCwALie-kVsIDRnmQrZYtekWmljesj5IAHfDUVBa6nVCHINUrm0zsvAj0weYIeSm~kFd5OcLj84hkuIKbfC3nksQ__' } },
-
-  ];
+  
 
   const handleImageScroll = (event) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / SIZES.width);
@@ -88,12 +113,18 @@ const ProductDetail = ({ route, navigation }) => {
     }
   }
 
+
+
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.wrapper}
         showsVerticalScrollIndicator={false}
       >
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Icon name="arrow-back" size={30} color={COLORS.black} />
+        </TouchableOpacity>
 
         <View style={styles.imageSlider}>
           <FlatList
@@ -166,12 +197,15 @@ const ProductDetail = ({ route, navigation }) => {
             <View style={styles.materialWrapper}>
               <Text style={{ color: "black", fontWeight: "500" }}> Nylon 5%</Text>
             </View >
+            <View style={styles.materialWrapper}>
+              <Text style={{ color: "black", fontWeight: "500" }}>Wool 80%</Text>
+            </View >
 
           </View>
 
           <Text style={{ color: 'black', fontSize: 18, fontWeight: "600", marginBottom: 10, }}>Origin </Text>
           <View style={[styles.materialWrapper, { backgroundColor: "#E5EBFC" }]}>
-            <Text style={{ color: "black", fontWeight: "500" }}> EU </Text>
+            <Text style={{ color: "black", fontWeight: "500" }}> Viet Nam </Text>
           </View>
 
         </View>
@@ -202,22 +236,37 @@ const ProductDetail = ({ route, navigation }) => {
         {/* Rating & Reviews */}
         <View style={styles.reviews}>
           <Text style={styles.sectionTitle}>Rating & Reviews</Text>
-          {/* handle sau */}
+
+
           <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
             <View style={{ flexDirection: "row" }}>
-              <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-              <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-              <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-              <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-              <Icon name='star' type='feather' color={"#ECA61B"} size={20} />
+              {
+                Array.from({ length: 5 }).map((_, index) => {
+                  const isFullStar = index < Math.floor(product.rating);
+                  const isHalfStar = index === Math.floor(product.rating) && product.rating % 1 !== 0;
+
+                  return (
+                    <Icon
+                      key={index}
+                      name={isFullStar ? 'star' : isHalfStar ? 'star-half' : 'star-outline'}
+                      type='Ionicons'
+                      color={isFullStar || isHalfStar ? "#EDB310" : "#BBBBBB"}
+                      size={20}
+                    />
+                  );
+                })
+              }
             </View>
             <View style={[styles.materialWrapper, { backgroundColor: "#E5EBFC", width: 60, height: 30 }]}>
-              <Text style={{ fontWeight: 500, fontSize: 14 }}>4.5 / 5</Text>
+              <Text style={{ fontWeight: 500, fontSize: 14 }}>{product.rating} / 5</Text>
             </View>
+
           </View>
+
+
           <View style={styles.reviewItem}>
             <View style={{ flexDirection: "row", marginTop: 10 }}>
-              <Image source={require('../../assets/images/default_avatar.jpg')} style={styles.reviewerImage} />
+              <Image source={require('../../assets/images/avatar-1.jpg')} style={styles.reviewerImage} />
               <View>
                 <Text style={{ fontWeight: "500", fontSize: 16 }} >Veronika</Text>
                 <View style={{ flexDirection: "row" }}>
@@ -231,29 +280,72 @@ const ProductDetail = ({ route, navigation }) => {
             </View>
             <Text style={{ fontSize: 15, marginLeft: 50, }}>Great product, loved it!</Text>
           </View>
+          {
+            showReviews ? (
+              <>
+                <View style={styles.reviewItem}>
+                  <View style={{ flexDirection: "row", marginTop: 10 }}>
+                    <Image source={require('../../assets/images/avatar-2.jpg')} style={styles.reviewerImage} />
+                    <View>
+                      <Text style={{ fontWeight: "500", fontSize: 16 }} >Huệ Nguyễn</Text>
+                      <View style={{ flexDirection: "row" }}>
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                      </View>
+                    </View>
+                  </View>
+                  <Text style={{ fontSize: 15, marginLeft: 50, }}>Sản phẩm chất lượng cao, rất đáng trải nghiệm</Text>
+                </View>
+                <View style={styles.reviewItem}>
+                  <View style={{ flexDirection: "row", marginTop: 10 }}>
+                    <Image source={require('../../assets/images/avatar-3.jpg')} style={styles.reviewerImage} />
+                    <View>
+                      <Text style={{ fontWeight: "500", fontSize: 16 }} >Khánh Đình</Text>
+                      <View style={{ flexDirection: "row" }}>
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                      </View>
+                    </View>
+                  </View>
+                  <Text style={{ fontSize: 15, marginLeft: 50, }}>Mình rất hài lòng khi mua sản phẩm</Text>
+                </View>
+              </>
+
+            ) : (<View></View>)
+          }
+
+
+
           <View style={{ width: "100%", alignItems: "center", marginTop: 10 }}>
-            <TouchableOpacity style={styles.viewAllReviewsButton}>
-              <Text style={styles.viewAllText}>View All Reviews</Text>
+            <TouchableOpacity style={styles.viewAllReviewsButton} onPress={() => (setShowReviews(!showReviews))}>
+              <Text style={styles.viewAllText}> {!showReviews ? "View All Reviews" : "Hide All Reviews"}</Text>
             </TouchableOpacity>
           </View>
+
         </View>
 
         {/* You Might Like */}
-        <View style={styles.related}>
-          <Text style={styles.sectionTitle}>You Might Like</Text>
+        {/* <View style={styles.related}>
+          <Text style={styles.sectionTitle}>Đề xuất dành cho bạn</Text>
           <FlatList
-            data={relatedItems}
+            data={relatedProducts?.sort(() => 0.5 - Math.random()).slice(0, 4)}
             horizontal
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
               <View style={styles.relatedItem}>
-                <Image source={item.image} style={styles.relatedImage} />
-                <Text>{item.title}</Text>
-                <Text>{item.price}</Text>
+                <Image source={item.images[0]} style={styles.relatedImage} />
+                <Text>{item.name}</Text>
+                <Text>{item.variations[0].price}</Text>
               </View>
             )}
           />
-        </View>
+        </View> */}
       </ScrollView>
 
       {/* Buttons */}
@@ -279,12 +371,21 @@ export default ProductDetail;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
     paddingTop: StatusBar.currentHeight + 12 || 0,
     paddingBottom: 50,
   },
   wrapper: {
     paddingBottom: 10,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 0,
+    opacity: 0.4,
+    left: 5,
+    padding: 10,
+    borderRadius: 99,
+    zIndex: 1,
   },
   imageSlider: {
     height: 300,
@@ -460,6 +561,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 24,
     alignItems: "center",
+    height: 70,
     position: 'absolute',
     backgroundColor: "white",
     bottom: 0,
