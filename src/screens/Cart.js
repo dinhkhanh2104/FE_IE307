@@ -16,7 +16,6 @@ import CardWishList from '../components/CardWishList';
 import AuthContext from '../contexts/AuthContext';
 import formatCurrency from '../../utils/formatCurrency';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 const Cart = ({ navigation }) => {
   const { cart, setCart } = useContext(AuthContext); // Access cart from context and setCart to update it
@@ -72,30 +71,7 @@ const Cart = ({ navigation }) => {
   };
 
   const delCart = async (sku, productId) => {
-    const token = await AsyncStorage.getItem('userToken');
-    try {
-      const response = await fetch('https://ie-307-6017b574900a.herokuapp.com/cart/remove', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          sku,
-          productId,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setCart(data.cart);
-        setCartItems(data.cart.items);  // Update cart items locally for UI
-      } else {
-        console.error('Failed to remove item:', response);
-      }
-    } catch (error) {
-      console.error('Error removing item:', error);
-    }
+    // Implement cart deletion logic
   };
 
   // Increment Quantity
@@ -167,24 +143,25 @@ const Cart = ({ navigation }) => {
               data={cartItems}
               renderItem={({ item }) => (
                 <View style={styles.cartItem}>
-                  <Image source={{ uri: item.variation.images[0] }} style={styles.image} />
                   <TouchableOpacity
-                    onPress={() => delCart(item.variation.sku, item.productId)} // Remove item
-                    style={{
-                      position: 'absolute',
-                      bottom: 10,
-                      left: 10,
-                      backgroundColor: 'white',
-                      borderRadius: 999,
-                      width: 40,
-                      height: 40,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
+                    style={styles.selectionButton}
+                    onPress={() => toggleSelection(item.variation.sku)}
                   >
-                    <Ionicons name="trash-outline" size={26} color={COLORS.primary} />
+                    <Ionicons
+                      name={selectedItems.has(item.variation.sku) ? "checkbox" : "square-outline"}
+                      size={24}
+                      color={COLORS.primary}
+                    />
                   </TouchableOpacity>
+                  <Image source={{ uri: item.variation.images[0] }} style={styles.image} />
+
                   <View style={styles.itemDetails}>
+                    <TouchableOpacity
+                      onPress={() => delCart(item.variation.sku, item.productId)} // Remove item
+                      style={styles.deleteButton}
+                    >
+                      <Text style={styles.deleteText}>X</Text>
+                    </TouchableOpacity>
                     <Text style={styles.title}>{item.productName}</Text>
                     <Text style={styles.subtitle}>
                       {`Color: ${item.variation.attributes[0].values[0]}`}
@@ -208,16 +185,6 @@ const Cart = ({ navigation }) => {
                       </View>
                     </View>
                   </View>
-                  <TouchableOpacity
-                    style={styles.selectionButton}
-                    onPress={() => toggleSelection(item.variation.sku)}
-                  >
-                    <Ionicons
-                      name={selectedItems.has(item.variation.sku) ? "checkbox" : "checkbox-outline"}
-                      size={24}
-                      color={COLORS.primary}
-                    />
-                  </TouchableOpacity>
                 </View>
               )}
               keyExtractor={(item) => item.variation.sku}
@@ -246,7 +213,7 @@ const Cart = ({ navigation }) => {
 
         {/* Fixed Total and Checkout */}
         <View style={styles.totalContainer}>
-          <Text style={styles.totalText}>Total: ${calculateTotal()}</Text>
+          <Text style={styles.totalText}>Total: {formatCurrency(calculateTotal())}</Text>
           {selectedItems.size > 0 ? (
             <TouchableOpacity style={styles.checkoutButton} onPress={handleNavigateCheckOut}>
               <Text style={styles.checkoutText}>Checkout</Text>
@@ -271,12 +238,13 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 16,
     paddingHorizontal: 16,
   },
   heading: {
     fontSize: 26,
     fontWeight: 'bold',
+    color: COLORS.primary,
   },
   badge: {
     marginLeft: 8,
@@ -290,43 +258,13 @@ const styles = StyleSheet.create({
   badgeText: {
     fontWeight: 'bold',
     fontSize: 16,
-  },
-  addressContainer: {
-    backgroundColor: '#F9F9F9',
-    padding: 16,
-    borderRadius: 8,
-    marginHorizontal: 16,
-    marginBottom: 16,
-  },
-  addressTitle: {
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  addressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  address: {
-    flex: 1,
-    fontSize: 14,
-    color: '#000',
-  },
-  editIconContainer: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 17.5,
-    padding: 5,
-    width: 35,
-    height: 35,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 16,
+    color: COLORS.primary,
   },
   cartList: {
     marginBottom: 16,
   },
   scrollViewContent: {
-    paddingBottom: 100, // Prevent overlap
+    paddingBottom: 100,
   },
   cartItem: {
     flexDirection: 'row',
@@ -338,15 +276,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#fff',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-    padding: 5,
+    shadowRadius: 5,
+    elevation: 4,
+    padding: 12,
   },
   image: {
-    width: 160,
-    height: 150,
+    width: 100,
+    height: 100,
     borderRadius: 8,
     marginRight: 16,
   },
@@ -356,15 +294,17 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 14,
+    color: '#333',
   },
   subtitle: {
-    fontSize: 14,
-    color: '#888',
+    fontSize: 13,
+    color: '#777',
   },
   price: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
+    color: COLORS.primary,
   },
   itemFooter: {
     flexDirection: 'row',
@@ -376,10 +316,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   controlButtonContainer: {
-    width: 32,
-    height: 32,
+    width: 30,
+    height: 30,
     borderRadius: 16,
-    borderWidth: 2,
     borderColor: '#004BFE',
     justifyContent: 'center',
     alignItems: 'center',
@@ -390,8 +329,8 @@ const styles = StyleSheet.create({
     color: '#004BFE',
   },
   quantity: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '500',
     backgroundColor: '#E5EBFC',
     lineHeight: 32,
     width: 37,
@@ -399,15 +338,20 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   deleteButton: {
-    fontSize: 20,
-    fontWeight: 700,
-    color: '#D97474',
+    alignItems:'flex-end',
+    backgroundColor: 'white',
+  },
+  deleteText: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    color: '#D74A4A',
   },
   sectionTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     marginHorizontal: 16,
     marginVertical: 8,
+    color: '#333',
   },
   totalContainer: {
     position: 'absolute',
@@ -428,7 +372,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 16,
     textAlign: 'center',
-    justifyContent: 'center',
+    color: '#333',
   },
   checkoutButton: {
     backgroundColor: COLORS.primary,
@@ -461,15 +405,16 @@ const styles = StyleSheet.create({
   },
   iconStyle: {
     borderRadius: 80,
-    borderWidth: 0,
-    borderColor: '#ddd',
+    backgroundColor: '#fff',
+    padding: 40,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 4,
-    backgroundColor: '#fff',
-    padding: 40,
+  },
+  selectionButton: {
+    marginHorizontal: 10,
   },
 });
 
