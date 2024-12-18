@@ -329,7 +329,7 @@ const ProductDetail = ({ route, navigation }) => {
         </View>
 
         {/* You Might Like */}
-        <View style={styles.related}>
+        {/* <View style={styles.related}>
           <Text style={styles.sectionTitle}>Đề xuất dành cho bạn</Text>
           <FlatList
             data={relatedProducts?.sort(() => 0.5 - Math.random()).slice(0, 4)}
@@ -343,7 +343,7 @@ const ProductDetail = ({ route, navigation }) => {
               </View>
             )}
           />
-        </View>
+        </View> */}
       </ScrollView>
 
       {/* Buttons */}

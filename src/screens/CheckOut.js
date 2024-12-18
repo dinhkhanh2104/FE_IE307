@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import {
   View,
   Text,
@@ -32,6 +32,18 @@ const Checkout = () => {
     city: 'Ho Chi Minh City',
     postcode: '70000',
   });
+
+
+  useEffect(() => {
+    navigation.getParent()?.getParent()?.setOptions({
+      tabBarStyle: { display: 'none' },
+    });
+    return () => {
+      navigation.getParent()?.setOptions({
+        tabBarStyle: undefined,
+      });
+    };
+  }, [navigation]);
 
   const vouchers = [
     { id: '1', title: 'First Purchase', discount: 5, expiry: '2024-12-31' },
@@ -212,8 +224,6 @@ const Checkout = () => {
 
 const styles = StyleSheet.create({
   container: {
-    borderWidth: 2,
-    borderColor: "red",
     flex: 1,
     backgroundColor: 'white',
     paddingHorizontal: 16,
