@@ -22,6 +22,7 @@ import { getProductByCategory } from '../services/axios/actions/ProductAction';
 const ProductDetail = ({ route, navigation }) => {
 
   const [relatedProducts, setRelatedProducts] = useState([])
+  const [selectedItems, setSelectedItems] = useState(new Set()); // Track selected items
 
   useEffect(() => {
     navigation.getParent()?.setOptions({
@@ -113,8 +114,28 @@ const ProductDetail = ({ route, navigation }) => {
     }
   }
 
-
-
+  const handleBuyNow = async (params) => {
+    console.log('asdfds',selectedItem)
+    const formattedData = [{
+      quantity: 1,
+      totalPrice: selectedPrice, 
+      price: selectedPrice,
+      productName: product.name,
+      productId: product._id,
+      category: product.category,
+      variation: {
+          sku: selectedItem.sku,
+          price: selectedItem.price,
+          stockQuantity: selectedItem.stockQuantity,
+          attributes: selectedItem.attributes,
+          images: selectedItem.images,
+          features: [],
+          specifications: []
+      }
+  }]
+  
+     navigation.navigate('CheckOut', { selectedCartItems:formattedData });
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -320,8 +341,6 @@ const ProductDetail = ({ route, navigation }) => {
             ) : (<View></View>)
           }
 
-
-
           <View style={{ width: "100%", alignItems: "center", marginTop: 10 }}>
             <TouchableOpacity style={styles.viewAllReviewsButton} onPress={() => (setShowReviews(!showReviews))}>
               <Text style={styles.viewAllText}> {!showReviews ? "View All Reviews" : "Hide All Reviews"}</Text>
@@ -357,7 +376,7 @@ const ProductDetail = ({ route, navigation }) => {
           <Text style={styles.addToCartText}>Add to cart</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buyNowButton}>
+        <TouchableOpacity style={styles.buyNowButton} onPress={handleBuyNow}>
           <Text style={styles.buyNowText}>Buy now</Text>
         </TouchableOpacity>
       </View>
