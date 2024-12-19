@@ -19,20 +19,25 @@ import AuthContext from '../contexts/AuthContext'; // Import the AuthContext
 import formatCurrency from '../../utils/formatCurrency';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Checkout = () => {
+const Checkout = ({route}) => {
   const navigation = useNavigation();
-  const { cart } = useContext(AuthContext); // Access the cart from context
   const [shippingOption, setShippingOption] = useState('Standard');
   const [isShippingModalVisible, setShippingModalVisible] = useState(false);
   const [isVoucherModalVisible, setVoucherModalVisible] = useState(false);
   const [appliedVoucher, setAppliedVoucher] = useState(null);
-  const [shippingAddress, setShippingAddress] = useState({
-    country: 'India',
-    street: '26, Duong So 2, Thao Dien Ward, An Phu',
-    city: 'Ho Chi Minh City',
-    postcode: '70000',
-  });
+  const [shippingAddress, setShippingAddress] = useState(address);
 
+  const {address} =  useContext(AuthContext)
+
+  const { selectedCartItems } = route.params; // Get selected items from route params
+
+  // Lọc địa chỉ mặc định khi component mount hoặc khi danh sách address thay đổi
+  useEffect(() => {
+    const defaultAddress = address.find((addr) => addr.isDefault);
+    setShippingAddress(defaultAddress || null); // Nếu không có địa chỉ mặc định, set null
+  }, [address]);
+
+  console.log(address)
 
   useEffect(() => {
     navigation.getParent()?.getParent()?.setOptions({
@@ -51,7 +56,7 @@ const Checkout = () => {
   ];
 
   const calculateTotal = () => {
-    const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const subtotal = selectedCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const discount = appliedVoucher ? (subtotal * appliedVoucher.discount) / 100 : 0;
     return (subtotal - discount).toFixed(2);
   };
@@ -68,9 +73,9 @@ const Checkout = () => {
   // Function to handle the "Pay" button click
   const handlePayment = async () => {
     const orderData = {
-      items: cart.map((item) => ({
-        productId: item.productId, // Ensure cart items have productId property
-        sku: item.variation.sku,             // SKU for the item
+      items: selectedCartItems.map((item) => ({
+        productId: item.productId,
+        sku: item.variation.sku,
         quantity: item.quantity,
         price: item.price,
         totalPrice: item.price * item.quantity,
@@ -81,11 +86,9 @@ const Checkout = () => {
       paymentMethod: 'credit card', // Assuming the user selected "credit card" for payment method
     };
 
-
-    const token = await AsyncStorage.getItem('userToken'); AsyncStorage
+    const token = await AsyncStorage.getItem('userToken');
 
     try {
-      console.log(111)
       const response = await fetch('https://ie-307-6017b574900a.herokuapp.com/order/create', {
         method: 'POST',
         headers: {
@@ -95,15 +98,12 @@ const Checkout = () => {
         body: JSON.stringify({ orderData }),
       });
 
-      console.log(response)
       const result = await response.json();
 
       if (response.ok) {
-        // Handle successful order creation
         Alert.alert('Order Created', 'Your order has been placed successfully!');
-        navigation.goBack(); // Optionally, navigate back to the previous screen
+        navigation.goBack();
       } else {
-        // Handle error response
         Alert.alert('Order Error', result.message || 'There was an error creating your order');
       }
     } catch (error) {
@@ -123,28 +123,27 @@ const Checkout = () => {
           <Text style={{ fontSize: 24, fontWeight: 'bold', flex: 1, textAlign: 'center' }}>Payment</Text>
         </View>
 
-        {/* Shipping Address */}
-        <View style={styles.section}>
+         {/* Shipping Address */}
+         <View style={styles.section}>
           <View style={styles.row}>
             <View style={{ width: '90%', flex: 0.9 }}>
-              <Text style={styles.sectionTitle}>Shipping Address</Text>
-              <Text style={styles.addressText}>{shippingAddress.street}, {shippingAddress.city}</Text>
+              <Text style={styles.sectionTitle}>Địa Chỉ Giao Hàng</Text>
+              {shippingAddress ? (
+                <>
+                  <Text style={styles.addressText}>{shippingAddress.name}</Text>
+                  <Text style={styles.addressText}>{shippingAddress.phoneNumber}</Text>
+                  <Text style={styles.addressText}>
+                    {shippingAddress.addressLine}, {shippingAddress.ward}, {shippingAddress.city}, {shippingAddress.country}
+                  </Text>
+                </>
+              ) : (
+                <Text style={styles.noAddressText}>Vui lòng chọn địa chỉ giao hàng</Text>
+              )}
             </View>
-            <TouchableOpacity style={styles.iconButton} onPress={() => setShippingModalVisible(true)}>
-              <Ionicons name="pencil" size={24} color="#F83758" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Contact Information */}
-        <View style={styles.section}>
-          <View style={styles.row}>
-            <View>
-              <Text style={styles.sectionTitle}>Contact Information</Text>
-              <Text style={styles.contactText}>+84932000000</Text>
-              <Text style={styles.contactText}>amandamorgan@example.com</Text>
-            </View>
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => navigation.navigate('AddressSelection')}
+            >
               <Ionicons name="pencil" size={24} color="#F83758" />
             </TouchableOpacity>
           </View>
@@ -162,8 +161,9 @@ const Checkout = () => {
             </TouchableOpacity>
           </View>
           <FlatList
-            data={cart} // Use cart data from context
+            data={selectedCartItems} // Use cart data from route params
             renderItem={({ item }) => {
+              const itemTotalPrice = item.price * item.quantity;
               return (
                 <View style={styles.itemRow}>
                   <Image
@@ -172,10 +172,13 @@ const Checkout = () => {
                     onError={() => console.log('Image failed to load')} // Error logging for the image
                   />
                   <View style={styles.itemDetails}>
-                    <Text style={styles.itemTitle}>{item.title}</Text>
+                    <Text style={styles.itemTitle}>{item.productName}</Text>
                     <Text style={styles.itemPrice}>{formatCurrency(item.price)}</Text>
                   </View>
-                  <Text style={styles.itemQuantity}>x{item.quantity}</Text>
+                  <View style={styles.itemQuantity}>
+                    <Text style={styles.quantityText}>x{item.quantity}</Text>
+                    <Text style={styles.totalPriceText}>Total: {formatCurrency(itemTotalPrice)}</Text>
+                  </View>
                 </View>
               );
             }}
@@ -198,7 +201,11 @@ const Checkout = () => {
         {/* Total and Pay Button */}
         <View style={styles.totalContainer}>
           <Text style={styles.totalText}>Total: {formatCurrency(calculateTotal())}</Text>
-          <TouchableOpacity style={styles.payButton} onPress={handlePayment}>
+          <TouchableOpacity
+            style={[styles.payButton, { backgroundColor: selectedCartItems.length > 0 ? '#F83758' : '#ccc' }]}
+            onPress={selectedCartItems.length > 0 ? handlePayment : null}
+            disabled={selectedCartItems.length === 0}
+          >
             <Text style={styles.payButtonText}>Pay</Text>
           </TouchableOpacity>
         </View>
@@ -283,8 +290,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   itemQuantity: {
+    alignItems: 'flex-end',
+    marginLeft: 12,
+  },
+  quantityText: {
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  totalPriceText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#F83758',
   },
   totalContainer: {
     flexDirection: 'row',
@@ -300,7 +316,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   payButton: {
-    backgroundColor: '#F83758',
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 24,
@@ -320,6 +335,10 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   noVoucherText: {
+    fontSize: 14,
+    color: '#888',
+  },
+  noAddressText: {
     fontSize: 14,
     color: '#888',
   },
