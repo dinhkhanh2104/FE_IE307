@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
         const response = await getCart(); // Fetch cart data using your getCart function
         setCart(response);
 
-        console.log(response)
+        // console.log(response)
       } catch (err) {
         console.error("Error fetching cart:", err);
       }

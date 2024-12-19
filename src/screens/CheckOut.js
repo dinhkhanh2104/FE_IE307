@@ -29,7 +29,9 @@ const Checkout = ({ route }) => {
   const { address,fetchCart } = useContext(AuthContext);
 
   const { selectedCartItems } = route.params;
+  console.log("Checkout: ", selectedCartItems)
 
+  
   // Lọc địa chỉ mặc định khi component mount hoặc khi danh sách address thay đổi
   useEffect(() => {
     const defaultAddress = address.find((addr) => addr.isDefault);
@@ -203,6 +205,7 @@ const Checkout = ({ route }) => {
           </View>
           <FlatList
             data={selectedCartItems}
+            scrollEnabled={false}
             renderItem={({ item }) => {
               const itemTotalPrice = item.price * item.quantity;
               return (
@@ -245,7 +248,7 @@ const Checkout = ({ route }) => {
 
         {/* Total and Pay Button */}
         <View style={styles.totalContainer}>
-          <Text style={styles.totalText}>Tổng Cộng: {formatCurrency(calculateTotal())}</Text>
+          <Text style={styles.totalText}> {formatCurrency(calculateTotal())}</Text>
           <TouchableOpacity
             style={[
               styles.payButton,

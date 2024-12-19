@@ -1,8 +1,6 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeNavigator from "./HomeNavigator"
-import Wishlist from "../screens/Wishlist";
 import Profile from "../screens/Profile";
-import CartNavigator from "./CartNavigator";
 import { Icon } from "react-native-elements";
 import { COLORS, SIZES } from "../constants/theme";
 import WishlistNavigator from "./WishlistNavigator";

@@ -23,6 +23,7 @@ const ProductDetail = ({ route, navigation }) => {
 
   const [relatedProducts, setRelatedProducts] = useState([])
 
+
   useEffect(() => {
     navigation.getParent()?.setOptions({
       tabBarStyle: { display: 'none' },
@@ -73,7 +74,7 @@ const ProductDetail = ({ route, navigation }) => {
     }).format(amount);
   };
 
-  
+
 
   const handleImageScroll = (event) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / SIZES.width);
@@ -83,7 +84,6 @@ const ProductDetail = ({ route, navigation }) => {
   const selectedVariation = product.variations.find(variation =>
     variation.attributes.some(attr => attr.attributeName === "Màu sắc" && attr.values.includes(selectedColor))
   );
-  // console.log("selected variation: ", selectedVariation)
 
   const handleColorChange = (color) => {
     setSelectedColor(color);
@@ -98,16 +98,16 @@ const ProductDetail = ({ route, navigation }) => {
     }
   };
 
+
+
   const handleAddToCart = async () => {
     try {
       const response = await addToCart(selectedItem.sku, product._id)
-      console.log(response);
-
+      Toast.show({
+        type: 'success',
+        text1: "Add to cart successfully",
+      });
       await fetchCart()
-
-      console.log('123')
-
-      alert({ type: 'success', text1: "Add to cart successfully" });
     }
     catch (error) {
       console.error("Error", error);
@@ -115,6 +115,13 @@ const ProductDetail = ({ route, navigation }) => {
     }
   }
 
+  const handleBuyNow = () => {
+    const selectedCartItems = [selectedItem]
+    navigation.navigate('Checkout', {  selectedCartItems });
+    console.log("ProductDetail", selectedCartItems);
+    
+  };
+  
 
 
 
@@ -124,6 +131,11 @@ const ProductDetail = ({ route, navigation }) => {
         contentContainerStyle={styles.wrapper}
         showsVerticalScrollIndicator={false}
       >
+        <Toast
+          position='top'
+          topOffset={20}
+        />
+
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Icon name="arrow-back" size={30} color={COLORS.black} />
         </TouchableOpacity>
@@ -348,6 +360,7 @@ const ProductDetail = ({ route, navigation }) => {
             )}
           />
         </View> */}
+
       </ScrollView>
 
       {/* Buttons */}
@@ -359,7 +372,7 @@ const ProductDetail = ({ route, navigation }) => {
           <Text style={styles.addToCartText}>Add to cart</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buyNowButton}>
+        <TouchableOpacity style={styles.buyNowButton} onPress={handleBuyNow}>
           <Text style={styles.buyNowText}>Buy now</Text>
         </TouchableOpacity>
       </View>
@@ -375,7 +388,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     paddingTop: StatusBar.currentHeight + 12 || 0,
-    paddingBottom: 50,
+    // paddingBottom: 50,
   },
   wrapper: {
     paddingBottom: 10,
@@ -564,11 +577,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     alignItems: "center",
     height: 70,
-    position: 'absolute',
-    backgroundColor: "white",
-    bottom: 0,
-    left: 0,
-    right: 0,
+    // position: 'absolute',
+    // backgroundColor: "white",
+    // bottom: 0,
+    // left: 0,
+    // right: 0,
   },
   addToCartButton: {
     width: 130,
