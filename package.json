@@ -36,7 +36,8 @@
     "react-native-navigation": "^7.40.3",
     "react-native-reanimated-carousel": "^3.5.1",
     "react-native-splash-screen": "^3.3.0",
-    "react-native-toast-message": "^2.2.1"
+    "react-native-toast-message": "^2.2.1",
+    "react-native-webview": "^13.12.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
