@@ -3,7 +3,7 @@ import React from 'react';
 import { Icon } from 'react-native-elements';
 import { COLORS, SIZES } from '../constants/theme';
 
-const Card = ({ data, onPress }) => {
+const Card = ({ data, onPress, isDiscounted = false }) => {
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('vi-VN', {
@@ -22,7 +22,7 @@ const Card = ({ data, onPress }) => {
                     source={{ uri: data.images[0] }}
                     style={styles.cardImage}
                 />
-                <Text style={styles.cardPercentSale}> - 40%</Text>
+                {isDiscounted ? (<Text style={styles.cardPercentSale}> - 40%</Text>) : <Text></Text> }   
             </View>
 
             <View style={{ paddingHorizontal: 8, gap: 10 }}>

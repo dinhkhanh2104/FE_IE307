@@ -10,7 +10,6 @@ import { carousel as carouselData } from '../../data/carousel'
 import Card from '../components/Card'
 import { getProducts } from '../services/axios/actions/ProductAction'
 import Spinner from 'react-native-loading-spinner-overlay'
-import { getCategories } from '../services/axios/actions/Categories'
 import { useContext } from "react";
 import AuthContext from "../contexts/AuthContext";
 
@@ -21,7 +20,6 @@ const Home = ({ navigation }) => {
   const { cart } = useContext(AuthContext)
 
   const [products, setProducts] = useState([])
-  const [categories, setCategories] = useState([])
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef(null);
@@ -66,7 +64,7 @@ const Home = ({ navigation }) => {
       });
     }, 1000);
 
-    return () => clearInterval(interval); 
+    return () => clearInterval(interval);
   }, []);
 
   const hours = Math.floor(timeRemaining / 3600);
@@ -78,9 +76,6 @@ const Home = ({ navigation }) => {
       try {
         const productsData = await getProducts();
         setProducts(productsData);
-
-        const categoriesData = await getCategories()
-        setCategories(categoriesData)
       }
       catch (error) {
         console.error(error);
@@ -113,10 +108,7 @@ const Home = ({ navigation }) => {
             source={require("../../assets/images/logo_home.png")}
             style={{ width: 140, height: 40 }}
           />
-          {/* <Image
-            source={require("../../assets/images/default_avatar.jpg")}
-            style={{ width: 50, height: 50, borderRadius: 999 }}
-          /> */}
+
           <TouchableOpacity onPress={handleNavigateCart} style={styles.cartIconWrapper}>
             <Icon name="shopping-cart" type="feather" size={26} color={COLORS.primary} />
             {cart.length >= 0 && (
@@ -143,11 +135,9 @@ const Home = ({ navigation }) => {
 
         <View style={styles.titleArea}>
 
-          <Text style={styles.textHeader}>
-            All Featured
-          </Text>
 
-          <View style={{ flexDirection: "row", gap: 16 }}>
+
+          {/* <View style={{ flexDirection: "row", gap: 16 }}>
             <TouchableOpacity style={styles.button}>
               <Text style={styles.buttonText}>Sort</Text>
               <Image
@@ -160,33 +150,11 @@ const Home = ({ navigation }) => {
               <Text style={styles.buttonText}>Filter</Text>
               <Icon name='filter' type='feather' size={18} />
             </TouchableOpacity>
-          </View>
+          </View> */}
 
         </View>
 
-        <ScrollView
-          showsHorizontalScrollIndicator={false}
-          style={styles.categoryWrapper}
-          horizontal
-        >
-          {
-            categories.map((item, index) => {
-              return (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.categoryItem}
-                  onPress={() => handleChooseCategory()}
-                >
-                  <Image
-                    source={{ uri: item.image }}
-                    style={styles.categoryImage}
-                  />
-                  <Text style={{ fontWeight: "500" }}>{item.name}</Text>
-                </TouchableOpacity>
-              )
-            })
-          }
-        </ScrollView>
+
 
         <View style={styles.carouselContainer}>
           <FlatList
@@ -216,7 +184,7 @@ const Home = ({ navigation }) => {
 
         <View style={styles.dealArea}>
           <View style={styles.dealWrapper}>
-            <Text style={styles.dealText}>Deal of the Day</Text>
+            <Text style={styles.dealText}>Deal of the day</Text>
             <View style={styles.dealTime}>
               <Icon name='alarm' type='MaterialCommunityIcons' size={24} color={COLORS.white} />
               <Text style={{ color: COLORS.white }}>
@@ -225,14 +193,14 @@ const Home = ({ navigation }) => {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.dealButton}>
+          <TouchableOpacity style={styles.dealButton} onPress={() => { navigation.navigate("SaleNavigator") }}>
             <Text style={styles.dealTextButton}>View all </Text>
             <Icon name='arrowright' type='antdesign' color={COLORS.white} />
           </TouchableOpacity>
         </View>
 
         <FlatList
-          data={products}
+          data={products.slice(0, Math.ceil(products.length / 2 + 1))}
           keyExtractor={(_, index) => index.toString()}
           numColumns={2}
           showsHorizontalScrollIndicator={false}
@@ -264,14 +232,14 @@ const Home = ({ navigation }) => {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.dealButton}>
+          <TouchableOpacity style={styles.dealButton}  onPress={() => { navigation.navigate("SaleNavigator")}}>
             <Text style={styles.dealTextButton}>View all</Text>
             <Icon name='arrowright' type='antdesign' color={COLORS.white} />
           </TouchableOpacity>
         </View>
 
         <FlatList
-          data={products}
+          data={products.slice(Math.floor(products.length / 2 + 1))}
           keyExtractor={(_, index) => index.toString()}
           numColumns={2}
           showsHorizontalScrollIndicator={false}
@@ -363,7 +331,7 @@ const styles = StyleSheet.create({
     fontSize: SIZES.font16,
   },
   titleArea: {
-    marginTop: 20,
+    marginTop: 10,
     flexDirection: "row",
     width: "100%",
     justifyContent: "space-between",

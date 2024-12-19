@@ -1,48 +1,57 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import Cart from "../screens/Cart";
-import CheckOut from "../screens/CheckOut";
+import Checkout from "../screens/Checkout";
 import AddressSelection from "../screens/AddressSelection ";
 import AddAddressScreen from "../screens/AddAddress";
 import EditAddressScreen from "../screens/EditAddress";
+import ProductDetail from "../screens/ProductDetail";
 
 const Stack = createStackNavigator()
 
 const CartNavigator = () => {
-    return(
+    return (
         <Stack.Navigator
             initialRouteName="CartScreen"
         >
-            <Stack.Screen 
+            <Stack.Screen
                 name="CartScreen"
                 component={Cart}
-                options={{headerShown: false}}
+                options={{ headerShown: false }}
             />
-            <Stack.Screen 
-                name="CheckOut"
-                component={CheckOut}
+            <Stack.Screen
+                name="Checkout"
+                component={Checkout}
                 options={{
-                   headerShown:false
+                    headerShown: false
                 }}
             />
+            {/* <Stack.Screen
+                name="ProductDetail"
+                component={ProductDetail}
+                options={{
+                    headerShown: false
+                }}
+            /> */}
+
             <Stack.Screen
                 name="AddressSelection"
                 component={AddressSelection}
                 options={{
-                headerShown:false
+                    headerShown: false
                 }}
             />
             <Stack.Screen
                 name="AddAddress"
                 component={AddAddressScreen}
                 options={{
-                headerShown:false
+                    headerShown: false
                 }}
             />
             <Stack.Screen
                 name="EditAddress"
                 component={EditAddressScreen}
                 options={{
-                headerShown:false
+                    headerShown: false
                 }}
             />
         </Stack.Navigator>

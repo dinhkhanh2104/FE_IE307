@@ -16,6 +16,9 @@ import CardWishList from '../components/CardWishList';
 import AuthContext from '../contexts/AuthContext';
 import formatCurrency from '../../utils/formatCurrency';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Icon } from 'react-native-elements';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 const Cart = ({ navigation }) => {
   const { cart, setCart } = useContext(AuthContext); // Access cart from context and setCart to update it
@@ -41,7 +44,7 @@ const Cart = ({ navigation }) => {
     },
   ]);
 
-  // Update the cart on the server
+
   const updateCart = async (sku, quantity, productId) => {
     const token = await AsyncStorage.getItem('userToken');
     try {
@@ -121,15 +124,22 @@ const Cart = ({ navigation }) => {
   // Navigate to Checkout with selected items
   const handleNavigateCheckOut = () => {
     const selectedCartItems = cartItems.filter(item => selectedItems.has(item.variation.sku));
-    navigation.navigate('CheckOut', { selectedCartItems });
+    navigation.navigate('Checkout', { selectedCartItems });
+    console.log(selectedCartItems)
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <ScrollView
+          contentContainerStyle={styles.scrollViewContent}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Header Section */}
           <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 5 }}>
+              <Icon name="arrow-back" size={30} color={COLORS.black} />
+            </TouchableOpacity>
             <Text style={styles.heading}>Cart</Text>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{cartItems.length}</Text>
@@ -160,11 +170,11 @@ const Cart = ({ navigation }) => {
                       onPress={() => delCart(item.variation.sku, item.productId)} // Remove item
                       style={styles.deleteButton}
                     >
-                      <Text style={styles.deleteText}>X</Text>
+                      <MaterialIcons name="cancel" size={30} color="red" />
                     </TouchableOpacity>
                     <Text style={styles.title}>{item.productName}</Text>
                     <Text style={styles.subtitle}>
-                      {`Color: ${item.variation.attributes[0].values[0]}`}
+                      {`Màu: ${item.variation.attributes[0].values[0]}`}
                     </Text>
                     <View style={styles.itemFooter}>
                       <Text style={styles.price}>{formatCurrency(item.price)}</Text>
@@ -173,14 +183,14 @@ const Cart = ({ navigation }) => {
                           onPress={() => decrementQuantity(item.productId, item.variation.sku)}
                           style={styles.controlButtonContainer}
                         >
-                          <Text style={styles.controlButton}>-</Text>
+                          <AntDesign name="minuscircle" size={24} color={"#f8375891"} />
                         </TouchableOpacity>
                         <Text style={styles.quantity}>{item.quantity}</Text>
                         <TouchableOpacity
                           onPress={() => incrementQuantity(item.productId, item.variation.sku)}
                           style={styles.controlButtonContainer}
                         >
-                          <Text style={styles.controlButton}>+</Text>
+                          <AntDesign name="pluscircle" size={24} color={"#f8375891"} />
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -257,13 +267,14 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 18,
     color: COLORS.primary,
   },
   cartList: {
     marginBottom: 16,
   },
   scrollViewContent: {
+    position: "relative",
     paddingBottom: 100,
   },
   cartItem: {
@@ -300,9 +311,10 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 13,
     color: '#777',
+    marginTop: 2,
   },
   price: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
     color: COLORS.primary,
   },
@@ -318,27 +330,29 @@ const styles = StyleSheet.create({
   controlButtonContainer: {
     width: 30,
     height: 30,
-    borderRadius: 16,
-    borderColor: '#004BFE',
+    borderRadius: 999,
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 4,
   },
   controlButton: {
-    fontSize: 16,
-    color: '#004BFE',
+    fontSize: 19,
+    color: COLORS.primary,
+    borderWidth: 1,
+    borderColor: "gray",
   },
   quantity: {
     fontSize: 13,
     fontWeight: '500',
-    backgroundColor: '#E5EBFC',
+    backgroundColor: '#f8375891',
     lineHeight: 32,
     width: 37,
     textAlign: 'center',
     borderRadius: 6,
+    color: "white"
   },
   deleteButton: {
-    alignItems:'flex-end',
+    alignItems: 'flex-end',
     backgroundColor: 'white',
   },
   deleteText: {
@@ -370,7 +384,6 @@ const styles = StyleSheet.create({
   totalText: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 16,
     textAlign: 'center',
     color: '#333',
   },
@@ -416,6 +429,7 @@ const styles = StyleSheet.create({
   selectionButton: {
     marginHorizontal: 10,
   },
+
 });
 
 export default Cart;

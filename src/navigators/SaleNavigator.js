@@ -1,17 +1,18 @@
 import { createStackNavigator } from "@react-navigation/stack";
-import Categories from "../screens/Categories";
+import Sale from "../screens/Sale";
 import ProductDetail from "../screens/ProductDetail";
 import Checkout from "../screens/Checkout";
+
 const Stack = createStackNavigator()
 
-const CategoriesNavigator = () => {
+const SaleNavigator = () => {
     return (
         <Stack.Navigator
-            initialRouteName="Categories"
+            initialRouteName="SaleScreen"
         >
             <Stack.Screen
-                name="Categories"
-                component={Categories}
+                name="SaleScreen"
+                component={Sale}
                 options={{ headerShown: false }}
             />
             <Stack.Screen
@@ -33,4 +34,4 @@ const CategoriesNavigator = () => {
     )
 }
 
-export default CategoriesNavigator
+export default SaleNavigator
