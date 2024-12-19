@@ -28,9 +28,9 @@ const VoucherModal = ({ visible, vouchers, onClose, onApply }) => {
                 onPress={() => onApply(item)} // Apply voucher and close modal
               >
                 <View>
-                  <Text style={styles.voucherTitle}>{item.title}</Text>
-                  <Text style={styles.voucherDiscount}>{item.discount}% off your next order</Text>
-                  <Text style={styles.voucherExpiry}>Valid Until: {item.expiry}</Text>
+                  <Text style={styles.voucherTitle}>{item.code}</Text>
+                  <Text style={styles.voucherDiscount}>{item.discountAmount}% off your next order</Text>
+                  <Text style={styles.endDate}>Valid Until: {item.expiry}</Text>
                 </View>
                 <Text style={styles.applyText}>Apply</Text>
               </TouchableOpacity>
