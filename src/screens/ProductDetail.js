@@ -103,9 +103,11 @@ const ProductDetail = ({ route, navigation }) => {
       const response = await addToCart(selectedItem.sku, product._id)
       console.log(response);
 
-      fetchCart();
+      await fetchCart()
 
-      Toast.show({ type: 'success', text1: "Add to cart successfully" });
+      console.log('123')
+
+      alert({ type: 'success', text1: "Add to cart successfully" });
     }
     catch (error) {
       console.error("Error", error);
