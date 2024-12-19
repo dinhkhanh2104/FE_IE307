@@ -16,6 +16,7 @@ import CardWishList from '../components/CardWishList';
 import AuthContext from '../contexts/AuthContext';
 import formatCurrency from '../../utils/formatCurrency';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Icon } from 'react-native-elements';
 
 const Cart = ({ navigation }) => {
   const { cart, setCart } = useContext(AuthContext); // Access cart from context and setCart to update it
@@ -41,7 +42,7 @@ const Cart = ({ navigation }) => {
     },
   ]);
 
-  // Update the cart on the server
+
   const updateCart = async (sku, quantity, productId) => {
     const token = await AsyncStorage.getItem('userToken');
     try {
@@ -129,6 +130,10 @@ const Cart = ({ navigation }) => {
       <View style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           {/* Header Section */}
+
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ borderColor: "red", borderWidth: 2, position: "absolute", top: 5, left: 5}}>
+            <Icon name="arrow-back" size={30} color={COLORS.black} />
+          </TouchableOpacity>
           <View style={styles.header}>
             <Text style={styles.heading}>Cart</Text>
             <View style={styles.badge}>
@@ -264,6 +269,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   scrollViewContent: {
+    position: "relative",
     paddingBottom: 100,
   },
   cartItem: {
@@ -338,7 +344,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   deleteButton: {
-    alignItems:'flex-end',
+    alignItems: 'flex-end',
     backgroundColor: 'white',
   },
   deleteText: {
@@ -416,6 +422,7 @@ const styles = StyleSheet.create({
   selectionButton: {
     marginHorizontal: 10,
   },
+ 
 });
 
 export default Cart;
