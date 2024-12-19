@@ -15,63 +15,98 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import VoucherModal from '../components/VoucherModal';
 import ShippingAddressModal from '../components/ShippingAddressModal';
 import { useNavigation } from '@react-navigation/native';
-import AuthContext from '../contexts/AuthContext'; // Import the AuthContext
+import AuthContext from '../contexts/AuthContext';
 import formatCurrency from '../../utils/formatCurrency';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getCart } from '../services/axios/actions/CartAction';
 
-const Checkout = ({route}) => {
+const Checkout = ({ route }) => {
   const navigation = useNavigation();
-  const [shippingOption, setShippingOption] = useState('Standard');
-  const [isShippingModalVisible, setShippingModalVisible] = useState(false);
   const [isVoucherModalVisible, setVoucherModalVisible] = useState(false);
   const [appliedVoucher, setAppliedVoucher] = useState(null);
-  const [shippingAddress, setShippingAddress] = useState(address);
+  const [shippingAddress, setShippingAddress] = useState(null);
+  const [discounts, setDiscounts] = useState([]);
+  const { address,fetchCart } = useContext(AuthContext);
 
-  const {address} =  useContext(AuthContext)
-
-  const { selectedCartItems } = route.params; // Get selected items from route params
+  const { selectedCartItems } = route.params;
 
   // Lọc địa chỉ mặc định khi component mount hoặc khi danh sách address thay đổi
   useEffect(() => {
     const defaultAddress = address.find((addr) => addr.isDefault);
-    setShippingAddress(defaultAddress || null); // Nếu không có địa chỉ mặc định, set null
+    setShippingAddress(defaultAddress || null);
+    fetchDiscounts();
   }, [address]);
 
-  console.log(address)
+  const fetchDiscounts = async () => {
+    try {
+      const response = await fetch('https://ie-307-6017b574900a.herokuapp.com/discount/valid');
+      const data = await response.json();
 
-  useEffect(() => {
-    navigation.getParent()?.getParent()?.setOptions({
-      tabBarStyle: { display: 'none' },
-    });
-    return () => {
-      navigation.getParent()?.setOptions({
-        tabBarStyle: undefined,
+      if (response.ok) {
+        setDiscounts(data.data);
+      } else {
+        console.error('Error fetching discounts:', data.message);
+        setDiscounts([]);
+      }
+    } catch (error) {
+      console.error('Error fetching discounts:', error);
+      setDiscounts([]);
+    }
+  };
+
+  const applyDiscount = async (code) => {
+    const token = await AsyncStorage.getItem('userToken');
+    try {
+      const response = await fetch('https://ie-307-6017b574900a.herokuapp.com/discount/apply', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ discountCode: code, cartTotal: calculateSubtotal() }),
       });
-    };
-  }, [navigation]);
-
-  const vouchers = [
-    { id: '1', title: 'First Purchase', discount: 5, expiry: '2024-12-31' },
-    { id: '2', title: 'Gift From Customer Care', discount: 15, expiry: '2025-01-15' },
-  ];
-
+  
+      const data = await response.json();
+  
+      if (response.ok && data.success) {
+        setAppliedVoucher({
+          code: code,
+          discountAmount: data.discountAmount,
+          newTotal: data.newTotal,
+        }); // Lưu thông tin discount đã áp dụng
+        Alert.alert('Thành công', data.message || 'Voucher đã được áp dụng');
+      } else {
+        Alert.alert('Lỗi', data.message || 'Không thể áp dụng voucher');
+      }
+    } catch (error) {
+      console.error('Lỗi khi áp dụng discount:', error);
+      Alert.alert('Lỗi', 'Đã xảy ra lỗi khi áp dụng voucher');
+    }
+  };
+  
+  
   const calculateTotal = () => {
-    const subtotal = selectedCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const discount = appliedVoucher ? (subtotal * appliedVoucher.discount) / 100 : 0;
-    return (subtotal - discount).toFixed(2);
+    if (appliedVoucher) {
+      return appliedVoucher.newTotal; // Sử dụng tổng tiền mới từ API
+    }
+    return calculateSubtotal(); // Nếu chưa áp dụng voucher, trả về tổng tiền ban đầu
   };
-
-  const saveShippingAddress = (address) => {
-    setShippingAddress(address);
-  };
+  
+  const calculateSubtotal = () => {
+    return selectedCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  };  
 
   const applyVoucher = (voucher) => {
-    setAppliedVoucher(voucher);
-    setVoucherModalVisible(false); // Close the modal after applying the voucher
+    applyDiscount(voucher.code); // Gửi mã voucher đến API
+    setVoucherModalVisible(false); // Đóng modal sau khi chọn voucher
   };
-
-  // Function to handle the "Pay" button click
+  
   const handlePayment = async () => {
+    if (!shippingAddress) {
+      Alert.alert('Lỗi', 'Vui lòng chọn địa chỉ giao hàng');
+      return;
+    }
+
     const orderData = {
       items: selectedCartItems.map((item) => ({
         productId: item.productId,
@@ -81,50 +116,56 @@ const Checkout = ({route}) => {
         totalPrice: item.price * item.quantity,
       })),
       shippingAddress: {
-        detailAddress: `${shippingAddress.street}, ${shippingAddress.city}, ${shippingAddress.country}`,
+        detailAddress: `${shippingAddress.addressLine}, ${shippingAddress.ward}, ${shippingAddress.city}, ${shippingAddress.country}`,
       },
-      paymentMethod: 'credit card', // Assuming the user selected "credit card" for payment method
+      paymentMethod: 'credit card',
     };
 
     const token = await AsyncStorage.getItem('userToken');
 
     try {
-      const response = await fetch('https://ie-307-6017b574900a.herokuapp.com/order/create', {
+      const response = await fetch('https://ie-307-6017b574900a.herokuapp.com/orders/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ orderData }),
+        body: JSON.stringify( orderData ),
       });
 
       const result = await response.json();
 
+      await fetchCart()
+
+      console.log(result)
+
       if (response.ok) {
-        Alert.alert('Order Created', 'Your order has been placed successfully!');
-        navigation.goBack();
+        Alert.alert('Đặt hàng thành công', 'Đơn hàng của bạn đã được đặt!');
+        navigation.navigate("HomeScreen")
       } else {
-        Alert.alert('Order Error', result.message || 'There was an error creating your order');
+        Alert.alert('Lỗi đặt hàng', result.error || 'Đã xảy ra lỗi khi đặt hàng');
       }
     } catch (error) {
       console.error('Error creating order:', error);
-      Alert.alert('Order Error', 'An error occurred while processing your order');
+      Alert.alert('Lỗi đặt hàng', 'Đã xảy ra lỗi khi xử lý đơn hàng của bạn');
     }
   };
+
+  
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         {/* Header */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 16, marginBottom: 16 }}>
+        <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={{ padding: 1 }}>
-            <Ionicons name='arrow-back' size={30} />
+            <Ionicons name="arrow-back" size={30} />
           </TouchableOpacity>
-          <Text style={{ fontSize: 24, fontWeight: 'bold', flex: 1, textAlign: 'center' }}>Payment</Text>
+          <Text style={styles.headerTitle}>Thanh Toán</Text>
         </View>
 
-         {/* Shipping Address */}
-         <View style={styles.section}>
+        {/* Shipping Address */}
+        <View style={styles.section}>
           <View style={styles.row}>
             <View style={{ width: '90%', flex: 0.9 }}>
               <Text style={styles.sectionTitle}>Địa Chỉ Giao Hàng</Text>
@@ -152,32 +193,30 @@ const Checkout = ({route}) => {
         {/* Items */}
         <View style={styles.section}>
           <View style={styles.row}>
-            <Text style={styles.sectionTitle}>Items</Text>
+            <Text style={styles.sectionTitle}>Sản Phẩm</Text>
             <TouchableOpacity
               style={{ borderWidth: 1, borderColor: 'red', borderRadius: 10, padding: 7 }}
-              onPress={() => setVoucherModalVisible(true)} // Open Voucher Modal
+              onPress={() => setVoucherModalVisible(true)}
             >
-              <Text style={styles.addVoucher}>Add Voucher</Text>
+              <Text style={styles.addVoucher}>Thêm Voucher</Text>
             </TouchableOpacity>
           </View>
           <FlatList
-            data={selectedCartItems} // Use cart data from route params
+            data={selectedCartItems}
             renderItem={({ item }) => {
               const itemTotalPrice = item.price * item.quantity;
               return (
                 <View style={styles.itemRow}>
-                  <Image
-                    source={{ uri: item?.variation?.images[0] }} // Image URL
-                    style={styles.itemImage}
-                    onError={() => console.log('Image failed to load')} // Error logging for the image
-                  />
+                  <Image source={{ uri: item?.variation?.images[0] }} style={styles.itemImage} />
                   <View style={styles.itemDetails}>
                     <Text style={styles.itemTitle}>{item.productName}</Text>
                     <Text style={styles.itemPrice}>{formatCurrency(item.price)}</Text>
                   </View>
                   <View style={styles.itemQuantity}>
                     <Text style={styles.quantityText}>x{item.quantity}</Text>
-                    <Text style={styles.totalPriceText}>Total: {formatCurrency(itemTotalPrice)}</Text>
+                    <Text style={styles.totalPriceText}>
+                      Tổng: {formatCurrency(itemTotalPrice)}
+                    </Text>
                   </View>
                 </View>
               );
@@ -188,43 +227,45 @@ const Checkout = ({route}) => {
 
         {/* Applied Voucher */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Applied Voucher</Text>
+          <Text style={styles.sectionTitle}>Áp Dụng Voucher</Text>
           {appliedVoucher ? (
-            <Text style={styles.appliedVoucherText}>
-              {appliedVoucher.title} - {appliedVoucher.discount}% off
-            </Text>
+            <View>
+              <Text style={styles.appliedVoucherText}>
+                Mã: {appliedVoucher.code} - Giảm: {formatCurrency(appliedVoucher.discountAmount)}
+              </Text>
+              <Text style={styles.newTotalText}>
+                Tổng Mới: {formatCurrency(appliedVoucher.newTotal)}
+              </Text>
+            </View>
           ) : (
-            <Text style={styles.noVoucherText}>No voucher applied</Text>
+            <Text style={styles.noVoucherText}>Chưa áp dụng voucher</Text>
           )}
         </View>
 
+
         {/* Total and Pay Button */}
         <View style={styles.totalContainer}>
-          <Text style={styles.totalText}>Total: {formatCurrency(calculateTotal())}</Text>
+          <Text style={styles.totalText}>Tổng Cộng: {formatCurrency(calculateTotal())}</Text>
           <TouchableOpacity
-            style={[styles.payButton, { backgroundColor: selectedCartItems.length > 0 ? '#F83758' : '#ccc' }]}
+            style={[
+              styles.payButton,
+              { backgroundColor: selectedCartItems.length > 0 ? '#F83758' : '#ccc' },
+            ]}
             onPress={selectedCartItems.length > 0 ? handlePayment : null}
             disabled={selectedCartItems.length === 0}
           >
-            <Text style={styles.payButtonText}>Pay</Text>
+            <Text style={styles.payButtonText}>Thanh Toán</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
       {/* Voucher Modal */}
-      <VoucherModal 
-        visible={isVoucherModalVisible} 
-        vouchers={vouchers} 
-        onApply={applyVoucher} 
+      <VoucherModal
+        visible={isVoucherModalVisible}
+        vouchers={discounts}
+        onApply={applyVoucher}
         onClose={() => setVoucherModalVisible(false)}
       />
-      {/* Shipping Address Modal */}
-      <ShippingAddressModal
-        visible={isShippingModalVisible}
-        onClose={() => setShippingModalVisible(false)}
-        address={shippingAddress}
-        onSave={saveShippingAddress}
-      /> 
     </SafeAreaView>
   );
 };
@@ -234,7 +275,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     paddingHorizontal: 16,
-    paddingTop: StatusBar.currentHeight
+    paddingTop: StatusBar.currentHeight,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
   },
   section: {
     backgroundColor: '#fff',
@@ -246,7 +299,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 10
   },
   sectionTitle: {
     fontSize: 18,
@@ -257,14 +309,9 @@ const styles = StyleSheet.create({
     color: '#555',
     marginTop: 4,
   },
-  contactText: {
+  noAddressText: {
     fontSize: 14,
-    color: '#555',
-  },
-  addVoucher: {
-    color: '#F83758',
-    fontSize: 14,
-    fontWeight: 'bold',
+    color: '#888',
   },
   itemRow: {
     flexDirection: 'row',
@@ -303,14 +350,25 @@ const styles = StyleSheet.create({
     color: '#F83758',
   },
   totalContainer: {
+    position: 'absolute', // Cố định vị trí
+    bottom: 0, // Đặt ở đáy màn hình
+    left: 0, // Canh lề trái
+    right: 0, // Canh lề phải
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 16,
     paddingVertical: 16,
+    paddingHorizontal: 16,
+    backgroundColor: '#fff', // Màu nền cho container
     borderTopWidth: 1,
     borderColor: '#eee',
+    elevation: 5, // Hiệu ứng đổ bóng trên Android
+    shadowColor: '#000', // Hiệu ứng đổ bóng trên iOS
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
+  
   totalText: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -324,23 +382,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
-  },
-  iconButton: {
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: '#f0f0f0',
-  },
-  appliedVoucherText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  noVoucherText: {
-    fontSize: 14,
-    color: '#888',
-  },
-  noAddressText: {
-    fontSize: 14,
-    color: '#888',
   },
 });
 
