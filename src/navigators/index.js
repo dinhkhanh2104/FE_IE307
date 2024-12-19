@@ -8,7 +8,7 @@ export default function Navigators() {
     const { token } = useContext(AuthContext)
     return (
         <NavigationContainer>
-            {token ? <BottomTabs /> : <AuthStack />}
+            {!token ? <BottomTabs /> : <AuthStack />}
         </NavigationContainer>
     )
 }

@@ -83,6 +83,7 @@ const ProductDetail = ({ route, navigation }) => {
   const selectedVariation = product.variations.find(variation =>
     variation.attributes.some(attr => attr.attributeName === "Màu sắc" && attr.values.includes(selectedColor))
   );
+  // console.log("selected variation: ", selectedVariation)
 
   const handleColorChange = (color) => {
     setSelectedColor(color);
@@ -93,6 +94,7 @@ const ProductDetail = ({ route, navigation }) => {
       setSelectedPrice(variation.price);
       setActiveImageIndex(0);
       setSelectedItem(variation)
+      // console.log(selectedItem)
     }
   };
 
