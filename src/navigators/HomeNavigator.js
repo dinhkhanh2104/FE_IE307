@@ -2,8 +2,10 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Home from "../screens/Home";
 import ProductDetail from "../screens/ProductDetail"
 import CartNavigator from "./CartNavigator";
-import SaleNavigator from "./SaleNavigator";
-import Checkout from "../screens/Checkout";
+import Checkout from "../screens/CheckOut";
+import AddressSelection from "../screens/AddressSelection ";
+import AddAddressScreen from "../screens/AddAddress";
+import EditAddressScreen from "../screens/EditAddress";
 
 const Stack = createStackNavigator()
 
@@ -39,14 +41,6 @@ const HomeNavigator = () => {
                     headerShown: false,
                 }}
             />
-            <Stack.Screen
-                name="Checkout"
-                component={Checkout}
-                options={{
-                    headerShown: false
-                }}
-            />
-
         </Stack.Navigator>
 
     )
