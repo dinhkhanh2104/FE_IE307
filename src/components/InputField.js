@@ -25,7 +25,7 @@ const InputField = ({ placeholder, isPassword, value, onChangeText, icon }) => {
             {isPassword && (
                 <TouchableOpacity style={{}} onPress={() => setShowPassword(!showPassword)}>
                     <Feather
-                        name={showPassword ? "eye" : "eye-off"}
+                        name={showPassword ? "eye-off" : "eye"}
                         size={24}
                         color={COLORS.semiGray}
                     />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,46 +12,131 @@ import {
 } from 'react-native';
 import { COLORS, SIZES } from '../constants/theme';
 import { Icon } from 'react-native-elements';
-import { createNativeWrapper } from 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
+import { addToCart } from '../services/axios/actions/CartAction';
 
-const ProductDetail = () => {
+import AuthContext from '../contexts/AuthContext';
+import { getProductByCategory } from '../services/axios/actions/ProductAction';
+
+
+const ProductDetail = ({ route, navigation }) => {
+
+  const [relatedProducts, setRelatedProducts] = useState([])
+  const [selectedItems, setSelectedItems] = useState(new Set()); // Track selected items
+
+  useEffect(() => {
+    navigation.getParent()?.setOptions({
+      tabBarStyle: { display: 'none' },
+    });
+    return () => {
+      navigation.getParent()?.setOptions({
+        tabBarStyle: undefined,
+      });
+    };
+  }, [navigation]);
+
+  useEffect(() => {
+    const fetchRelatedProduct = async () => {
+      try {
+        const data = await getProductByCategory(product.category)
+        setRelatedProducts(data)
+      }
+      catch (error) {
+        console.error(error)
+      }
+    }
+    fetchRelatedProduct()
+  }, []);
+
+  const { fetchCart } = useContext(AuthContext)
+
+  const { product } = route.params
+
+
+  const images = [...product.images, ...product.variations.flatMap(variation => variation.images)]
+  const price = product.variations[0].price
+
+  const colors = product.variations.map(variation => {
+    const colorAttribute = variation.attributes.find(attr => attr.attributeName === "Màu sắc");
+    return colorAttribute ? colorAttribute.values[0] : null;
+  });
+
   const [selectedColor, setSelectedColor] = useState();
-  const [selectedSize, setSelectedSize] = useState()
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [selectedPrice, setSelectedPrice] = useState(price);
+  const [selectedItem, setSelectedItem] = useState()
+  const [showReviews, setShowReviews] = useState(false)
 
-  const images = [
-    { uri: 'https://s3-alpha-sig.figma.com/img/337a/22ae/49b350434fc9e50a9abb7351559ff374?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=BAq~MJwQhMRVfwkfIa1kaSBiHG730qlg0bV~~KolTmp3mkXKn-elmHOvlrZpCIgVjMoMY~gn1EO-m1eiC6EuSV4QLH1mvUP7TtoemlpS9GHj-fcewTLmiwDDceBrnDo2cIVP-6aqY39HSlmnGTJh9FKd9MZ5BOya-q0J13YSR3xHnDCvyDqXim0zNuxh14fjn1p5aMb0~pAn1jZIhkbVXqGukdnCKHwGyY-8Qia4Y7-V2k5DniuW1Jgm8ov5j0~sI1zJk2RBy1j-VonvM0tCwwAc7U17AcYDMHfRfWqHDL62OLlHAvSYoHthd~mctzxVMKJo2vmgdVUpbLhpnaOnSg__' },
-    { uri: 'https://s3-alpha-sig.figma.com/img/337a/22ae/49b350434fc9e50a9abb7351559ff374?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=BAq~MJwQhMRVfwkfIa1kaSBiHG730qlg0bV~~KolTmp3mkXKn-elmHOvlrZpCIgVjMoMY~gn1EO-m1eiC6EuSV4QLH1mvUP7TtoemlpS9GHj-fcewTLmiwDDceBrnDo2cIVP-6aqY39HSlmnGTJh9FKd9MZ5BOya-q0J13YSR3xHnDCvyDqXim0zNuxh14fjn1p5aMb0~pAn1jZIhkbVXqGukdnCKHwGyY-8Qia4Y7-V2k5DniuW1Jgm8ov5j0~sI1zJk2RBy1j-VonvM0tCwwAc7U17AcYDMHfRfWqHDL62OLlHAvSYoHthd~mctzxVMKJo2vmgdVUpbLhpnaOnSg__' },
-    { uri: 'https://s3-alpha-sig.figma.com/img/337a/22ae/49b350434fc9e50a9abb7351559ff374?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=BAq~MJwQhMRVfwkfIa1kaSBiHG730qlg0bV~~KolTmp3mkXKn-elmHOvlrZpCIgVjMoMY~gn1EO-m1eiC6EuSV4QLH1mvUP7TtoemlpS9GHj-fcewTLmiwDDceBrnDo2cIVP-6aqY39HSlmnGTJh9FKd9MZ5BOya-q0J13YSR3xHnDCvyDqXim0zNuxh14fjn1p5aMb0~pAn1jZIhkbVXqGukdnCKHwGyY-8Qia4Y7-V2k5DniuW1Jgm8ov5j0~sI1zJk2RBy1j-VonvM0tCwwAc7U17AcYDMHfRfWqHDL62OLlHAvSYoHthd~mctzxVMKJo2vmgdVUpbLhpnaOnSg__' },
-  ];
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(amount);
+  };
 
-  const colors = ['Pink', 'Yellow', 'Blue'];
-  const sizes = ['X', 'L', 'M']
 
-  const popularItems = [
-
-    { id: 1, title: 'Item 1', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/337a/22ae/49b350434fc9e50a9abb7351559ff374?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=BAq~MJwQhMRVfwkfIa1kaSBiHG730qlg0bV~~KolTmp3mkXKn-elmHOvlrZpCIgVjMoMY~gn1EO-m1eiC6EuSV4QLH1mvUP7TtoemlpS9GHj-fcewTLmiwDDceBrnDo2cIVP-6aqY39HSlmnGTJh9FKd9MZ5BOya-q0J13YSR3xHnDCvyDqXim0zNuxh14fjn1p5aMb0~pAn1jZIhkbVXqGukdnCKHwGyY-8Qia4Y7-V2k5DniuW1Jgm8ov5j0~sI1zJk2RBy1j-VonvM0tCwwAc7U17AcYDMHfRfWqHDL62OLlHAvSYoHthd~mctzxVMKJo2vmgdVUpbLhpnaOnSg__' } },
-    { id: 2, title: 'Item 2', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/902c/2ed6/848fbde49066a7244b1f4197b721c175?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=hgQpK~jDV3IopeXCIAw8m5sTwln45rWkENqh0V~BXL3GBjp5194SqeGFF6UDy0tnxstBVG6k91iYlAY0-w7AjUJNJtWBOLvroQjcUogKt~uSNI5~CwAljS~Rb3V9ikKQ53XbPXQ8I4DWIYadTxGzGea-Lb3A4MH5EjU~Hd1fZV3UpUE0YaT79at8BBnosQCON75S7KtmJ2Ex6xHjJiH37a8ufjJIViy5PJ5vpuK1NkuiNeCBbaiyhm4ohwHORvNEL~CDkj65jm5NNSQFp03u1BTzsHs7bTkY6DRWCr8uBRPdOnQgiipqv6-vS2ZaMeJHAzYM6n4reFZwkzZasyMBPw__' } },
-    { id: 3, title: 'Item 2', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/902c/2ed6/848fbde49066a7244b1f4197b721c175?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=hgQpK~jDV3IopeXCIAw8m5sTwln45rWkENqh0V~BXL3GBjp5194SqeGFF6UDy0tnxstBVG6k91iYlAY0-w7AjUJNJtWBOLvroQjcUogKt~uSNI5~CwAljS~Rb3V9ikKQ53XbPXQ8I4DWIYadTxGzGea-Lb3A4MH5EjU~Hd1fZV3UpUE0YaT79at8BBnosQCON75S7KtmJ2Ex6xHjJiH37a8ufjJIViy5PJ5vpuK1NkuiNeCBbaiyhm4ohwHORvNEL~CDkj65jm5NNSQFp03u1BTzsHs7bTkY6DRWCr8uBRPdOnQgiipqv6-vS2ZaMeJHAzYM6n4reFZwkzZasyMBPw__' } },
-    { id: 4, title: 'Item 2', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/902c/2ed6/848fbde49066a7244b1f4197b721c175?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=hgQpK~jDV3IopeXCIAw8m5sTwln45rWkENqh0V~BXL3GBjp5194SqeGFF6UDy0tnxstBVG6k91iYlAY0-w7AjUJNJtWBOLvroQjcUogKt~uSNI5~CwAljS~Rb3V9ikKQ53XbPXQ8I4DWIYadTxGzGea-Lb3A4MH5EjU~Hd1fZV3UpUE0YaT79at8BBnosQCON75S7KtmJ2Ex6xHjJiH37a8ufjJIViy5PJ5vpuK1NkuiNeCBbaiyhm4ohwHORvNEL~CDkj65jm5NNSQFp03u1BTzsHs7bTkY6DRWCr8uBRPdOnQgiipqv6-vS2ZaMeJHAzYM6n4reFZwkzZasyMBPw__' } },
-    { id: 5, title: 'Item 2', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/902c/2ed6/848fbde49066a7244b1f4197b721c175?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=hgQpK~jDV3IopeXCIAw8m5sTwln45rWkENqh0V~BXL3GBjp5194SqeGFF6UDy0tnxstBVG6k91iYlAY0-w7AjUJNJtWBOLvroQjcUogKt~uSNI5~CwAljS~Rb3V9ikKQ53XbPXQ8I4DWIYadTxGzGea-Lb3A4MH5EjU~Hd1fZV3UpUE0YaT79at8BBnosQCON75S7KtmJ2Ex6xHjJiH37a8ufjJIViy5PJ5vpuK1NkuiNeCBbaiyhm4ohwHORvNEL~CDkj65jm5NNSQFp03u1BTzsHs7bTkY6DRWCr8uBRPdOnQgiipqv6-vS2ZaMeJHAzYM6n4reFZwkzZasyMBPw__' } },
-    { id: 6, title: 'Item 2', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/902c/2ed6/848fbde49066a7244b1f4197b721c175?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=hgQpK~jDV3IopeXCIAw8m5sTwln45rWkENqh0V~BXL3GBjp5194SqeGFF6UDy0tnxstBVG6k91iYlAY0-w7AjUJNJtWBOLvroQjcUogKt~uSNI5~CwAljS~Rb3V9ikKQ53XbPXQ8I4DWIYadTxGzGea-Lb3A4MH5EjU~Hd1fZV3UpUE0YaT79at8BBnosQCON75S7KtmJ2Ex6xHjJiH37a8ufjJIViy5PJ5vpuK1NkuiNeCBbaiyhm4ohwHORvNEL~CDkj65jm5NNSQFp03u1BTzsHs7bTkY6DRWCr8uBRPdOnQgiipqv6-vS2ZaMeJHAzYM6n4reFZwkzZasyMBPw__' } },
-    { id: 7, title: 'Item 2', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/902c/2ed6/848fbde49066a7244b1f4197b721c175?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=hgQpK~jDV3IopeXCIAw8m5sTwln45rWkENqh0V~BXL3GBjp5194SqeGFF6UDy0tnxstBVG6k91iYlAY0-w7AjUJNJtWBOLvroQjcUogKt~uSNI5~CwAljS~Rb3V9ikKQ53XbPXQ8I4DWIYadTxGzGea-Lb3A4MH5EjU~Hd1fZV3UpUE0YaT79at8BBnosQCON75S7KtmJ2Ex6xHjJiH37a8ufjJIViy5PJ5vpuK1NkuiNeCBbaiyhm4ohwHORvNEL~CDkj65jm5NNSQFp03u1BTzsHs7bTkY6DRWCr8uBRPdOnQgiipqv6-vS2ZaMeJHAzYM6n4reFZwkzZasyMBPw__' } },
-  ];
-
-  const relatedItems = [
-    { id: 1, title: 'Item 1', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/32b2/fed3/dd6e97ca36cbcbf5ca57596f7c6547d3?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=cMvCxnGq5IAD7O4TkGF6K30c0Xv8QNdC3CwdnW2Xagf37NzAxgGHXhr8CSQtgN26DLS9Oili5YHq9sa1c9hm78aWj7mV6PF4tIji2nj5U7PvgmkUaNd48yRMCD81pjA56Wb30~Rtxk22rsQxlgZOvMi9l9yK8EG9dKaQaFy0oIvxQIJhZFjHruWOSR-BRl~JOUPrbxLpguj-8~E1e11ykUWKDsCUIxAmy5Ngo0MGba2pAljqFpf5ZCv3cg4-MWTCwALie-kVsIDRnmQrZYtekWmljesj5IAHfDUVBa6nVCHINUrm0zsvAj0weYIeSm~kFd5OcLj84hkuIKbfC3nksQ__' } },
-    { id: 2, title: 'Item 2', price: '$17.00', image: { uri: 'https://s3-alpha-sig.figma.com/img/32b2/fed3/dd6e97ca36cbcbf5ca57596f7c6547d3?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=cMvCxnGq5IAD7O4TkGF6K30c0Xv8QNdC3CwdnW2Xagf37NzAxgGHXhr8CSQtgN26DLS9Oili5YHq9sa1c9hm78aWj7mV6PF4tIji2nj5U7PvgmkUaNd48yRMCD81pjA56Wb30~Rtxk22rsQxlgZOvMi9l9yK8EG9dKaQaFy0oIvxQIJhZFjHruWOSR-BRl~JOUPrbxLpguj-8~E1e11ykUWKDsCUIxAmy5Ngo0MGba2pAljqFpf5ZCv3cg4-MWTCwALie-kVsIDRnmQrZYtekWmljesj5IAHfDUVBa6nVCHINUrm0zsvAj0weYIeSm~kFd5OcLj84hkuIKbfC3nksQ__' } },
-
-  ];
 
   const handleImageScroll = (event) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / SIZES.width);
     setActiveImageIndex(index);
   };
 
-  const [selectedItem, setSelectedItem] = useState(null);
+  const selectedVariation = product.variations.find(variation =>
+    variation.attributes.some(attr => attr.attributeName === "Màu sắc" && attr.values.includes(selectedColor))
+  );
 
+  const handleColorChange = (color) => {
+    setSelectedColor(color);
+    const variation = product.variations.find(variation =>
+      variation.attributes.some(attr => attr.attributeName === "Màu sắc" && attr.values.includes(color))
+    );
+    if (variation) {
+      setSelectedPrice(variation.price);
+      setActiveImageIndex(0);
+      setSelectedItem(variation)
+      // console.log(selectedItem)
+    }
+  };
+
+
+
+  const handleAddToCart = async () => {
+    try {
+      const response = await addToCart(selectedItem.sku, product._id)
+      Toast.show({
+        type: 'success',
+        text1: "Add to cart successfully",
+      });
+      await fetchCart()
+    }
+    catch (error) {
+      console.error("Error", error);
+      Toast.show({ type: 'error', text1: "Add to cart failed. Please try again." });
+    }
+  }
+
+  const handleBuyNow = async (params) => {
+    console.log('asdfds',selectedItem)
+    const formattedData = [{
+      quantity: 1,
+      totalPrice: selectedPrice, 
+      price: selectedPrice,
+      productName: product.name,
+      productId: product._id,
+      category: product.category,
+      variation: {
+          sku: selectedItem.sku,
+          price: selectedItem.price,
+          stockQuantity: selectedItem.stockQuantity,
+          attributes: selectedItem.attributes,
+          images: selectedItem.images,
+          features: [],
+          specifications: []
+      }
+  }]
+  
+     navigation.navigate('CheckOut', { selectedCartItems:formattedData });
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -59,27 +144,37 @@ const ProductDetail = () => {
         contentContainerStyle={styles.wrapper}
         showsVerticalScrollIndicator={false}
       >
+        <Toast
+          position='top'
+          topOffset={20}
+        />
+
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Icon name="arrow-back" size={30} color={COLORS.black} />
+        </TouchableOpacity>
 
         <View style={styles.imageSlider}>
           <FlatList
-            data={images}
+            data={selectedVariation ? selectedVariation.images : images}
             horizontal
             showsHorizontalScrollIndicator={false}
             pagingEnabled
             keyExtractor={(_, index) => index.toString()}
             onScroll={handleImageScroll}
             renderItem={({ item }) => (
-              <Image source={item} style={styles.productImage} />
+              <Image source={{ uri: item }} style={styles.productImage} />
             )}
           />
           <View style={styles.pagination}>
-            {images.map((_, index) => (
+            {selectedVariation ? selectedVariation.images.map((_, index) => (
               <View
                 key={index}
-                style={[
-                  styles.dot,
-                  activeImageIndex === index && styles.activeDot,
-                ]}
+                style={[styles.dot, activeImageIndex === index && styles.activeDot]}
+              />
+            )) : images.map((_, index) => (
+              <View
+                key={index}
+                style={[styles.dot, activeImageIndex === index && styles.activeDot]}
               />
             ))}
           </View>
@@ -87,19 +182,18 @@ const ProductDetail = () => {
 
         <View style={styles.productInfo}>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <Text style={styles.price}>200.000đ</Text>
+            <Text style={styles.price}>{formatCurrency(selectedPrice)}</Text>
             <View style={styles.iconWrapper}>
               <Icon name='share-a' type='fontisto' size={14} color={"#B5A2A2"} />
             </View>
           </View>
-          <Text style={styles.description}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam arcu
-            mauris, scelerisque eu mauris id, pretium pulvinar sapien.
-          </Text>
+          <Text style={styles.title}>{product.name}</Text>
+          <Text style={styles.description}>{product.description}</Text>
         </View>
 
+        {/* Phần màu sắc (variations) */}
         <View style={styles.variations}>
-          <Text style={styles.sectionTitle}>Variations</Text>
+          <Text style={styles.sectionTitle}>Màu sắc</Text>
           <FlatList
             data={colors}
             horizontal
@@ -110,48 +204,12 @@ const ProductDetail = () => {
                   styles.colorBox,
                   selectedColor === item && styles.selectedVariation,
                 ]}
-                onPress={() => setSelectedColor(item)}
+                onPress={() => handleColorChange(item)}
               >
                 <Text style={styles.variationText}>{item}</Text>
               </TouchableOpacity>
             )}
           />
-
-          <FlatList
-            data={sizes}
-            horizontal
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.colorBox,
-                  selectedSize === item && styles.selectedVariation,
-                ]}
-                onPress={() => setSelectedSize(item)}
-              >
-                <Text style={styles.variationText}>{item}</Text>
-              </TouchableOpacity>
-            )}
-          />
-
-          <FlatList
-            data={popularItems}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.popularItem,
-                  selectedItem === item.id && styles.selectedItemBorder,
-                ]}
-                onPress={() => setSelectedItem(item.id)}
-              >
-                <Image source={item.image} style={styles.popularImage} />
-              </TouchableOpacity>
-            )}
-          />
-
         </View>
 
         {/* Specifications */}
@@ -166,12 +224,15 @@ const ProductDetail = () => {
             <View style={styles.materialWrapper}>
               <Text style={{ color: "black", fontWeight: "500" }}> Nylon 5%</Text>
             </View >
+            <View style={styles.materialWrapper}>
+              <Text style={{ color: "black", fontWeight: "500" }}>Wool 80%</Text>
+            </View >
 
           </View>
 
           <Text style={{ color: 'black', fontSize: 18, fontWeight: "600", marginBottom: 10, }}>Origin </Text>
           <View style={[styles.materialWrapper, { backgroundColor: "#E5EBFC" }]}>
-            <Text style={{ color: "black", fontWeight: "500" }}> EU </Text>
+            <Text style={{ color: "black", fontWeight: "500" }}> Viet Nam </Text>
           </View>
 
         </View>
@@ -202,22 +263,37 @@ const ProductDetail = () => {
         {/* Rating & Reviews */}
         <View style={styles.reviews}>
           <Text style={styles.sectionTitle}>Rating & Reviews</Text>
-          {/* handle sau */}
+
+
           <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
             <View style={{ flexDirection: "row" }}>
-              <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-              <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-              <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-              <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-              <Icon name='star' type='feather' color={"#ECA61B"} size={20} />
+              {
+                Array.from({ length: 5 }).map((_, index) => {
+                  const isFullStar = index < Math.floor(product.rating);
+                  const isHalfStar = index === Math.floor(product.rating) && product.rating % 1 !== 0;
+
+                  return (
+                    <Icon
+                      key={index}
+                      name={isFullStar ? 'star' : isHalfStar ? 'star-half' : 'star-outline'}
+                      type='Ionicons'
+                      color={isFullStar || isHalfStar ? "#EDB310" : "#BBBBBB"}
+                      size={20}
+                    />
+                  );
+                })
+              }
             </View>
             <View style={[styles.materialWrapper, { backgroundColor: "#E5EBFC", width: 60, height: 30 }]}>
-              <Text style={{ fontWeight: 500, fontSize: 14 }}>4.5 / 5</Text>
+              <Text style={{ fontWeight: 500, fontSize: 14 }}>{product.rating} / 5</Text>
             </View>
+
           </View>
+
+
           <View style={styles.reviewItem}>
             <View style={{ flexDirection: "row", marginTop: 10 }}>
-              <Image source={require('../../assets/images/default_avatar.jpg')} style={styles.reviewerImage} />
+              <Image source={require('../../assets/images/avatar-1.jpg')} style={styles.reviewerImage} />
               <View>
                 <Text style={{ fontWeight: "500", fontSize: 16 }} >Veronika</Text>
                 <View style={{ flexDirection: "row" }}>
@@ -231,29 +307,71 @@ const ProductDetail = () => {
             </View>
             <Text style={{ fontSize: 15, marginLeft: 50, }}>Great product, loved it!</Text>
           </View>
+          {
+            showReviews ? (
+              <>
+                <View style={styles.reviewItem}>
+                  <View style={{ flexDirection: "row", marginTop: 10 }}>
+                    <Image source={require('../../assets/images/avatar-2.jpg')} style={styles.reviewerImage} />
+                    <View>
+                      <Text style={{ fontWeight: "500", fontSize: 16 }} >Huệ Nguyễn</Text>
+                      <View style={{ flexDirection: "row" }}>
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                      </View>
+                    </View>
+                  </View>
+                  <Text style={{ fontSize: 15, marginLeft: 50, }}>Sản phẩm chất lượng cao, rất đáng trải nghiệm</Text>
+                </View>
+                <View style={styles.reviewItem}>
+                  <View style={{ flexDirection: "row", marginTop: 10 }}>
+                    <Image source={require('../../assets/images/avatar-3.jpg')} style={styles.reviewerImage} />
+                    <View>
+                      <Text style={{ fontWeight: "500", fontSize: 16 }} >Khánh Đình</Text>
+                      <View style={{ flexDirection: "row" }}>
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                      </View>
+                    </View>
+                  </View>
+                  <Text style={{ fontSize: 15, marginLeft: 50, }}>Mình rất hài lòng khi mua sản phẩm</Text>
+                </View>
+              </>
+
+            ) : (<View></View>)
+          }
+
           <View style={{ width: "100%", alignItems: "center", marginTop: 10 }}>
-            <TouchableOpacity style={styles.viewAllReviewsButton}>
-              <Text style={styles.viewAllText}>View All Reviews</Text>
+            <TouchableOpacity style={styles.viewAllReviewsButton} onPress={() => (setShowReviews(!showReviews))}>
+              <Text style={styles.viewAllText}> {!showReviews ? "View All Reviews" : "Hide All Reviews"}</Text>
             </TouchableOpacity>
           </View>
+
         </View>
 
         {/* You Might Like */}
-        <View style={styles.related}>
-          <Text style={styles.sectionTitle}>You Might Like</Text>
+        {/* <View style={styles.related}>
+          <Text style={styles.sectionTitle}>Đề xuất dành cho bạn</Text>
           <FlatList
-            data={relatedItems}
+            data={relatedProducts?.sort(() => 0.5 - Math.random()).slice(0, 4)}
             horizontal
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
               <View style={styles.relatedItem}>
-                <Image source={item.image} style={styles.relatedImage} />
-                <Text>{item.title}</Text>
-                <Text>{item.price}</Text>
+                <Image source={item.images[0]} style={styles.relatedImage} />
+                <Text>{item.name}</Text>
+                <Text>{item.variations[0].price}</Text>
               </View>
             )}
           />
-        </View>
+        </View> */}
+
       </ScrollView>
 
       {/* Buttons */}
@@ -261,11 +379,11 @@ const ProductDetail = () => {
         {/* <Icon name="heart" type="octicon" size={40} color={COLORS.black} /> */}
         <Icon name="heart-fill" type="octicon" size={40} color={COLORS.primary} />
 
-        <TouchableOpacity style={styles.addToCartButton}>
+        <TouchableOpacity style={styles.addToCartButton} onPress={handleAddToCart}>
           <Text style={styles.addToCartText}>Add to cart</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buyNowButton}>
+        <TouchableOpacity style={styles.buyNowButton} onPress={handleBuyNow}>
           <Text style={styles.buyNowText}>Buy now</Text>
         </TouchableOpacity>
       </View>
@@ -279,12 +397,21 @@ export default ProductDetail;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
     paddingTop: StatusBar.currentHeight + 12 || 0,
-    paddingBottom: 50,
+    // paddingBottom: 50,
   },
   wrapper: {
     paddingBottom: 10,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 0,
+    opacity: 0.4,
+    left: 5,
+    padding: 10,
+    borderRadius: 99,
+    zIndex: 1,
   },
   imageSlider: {
     height: 300,
@@ -316,7 +443,8 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   price: {
-    fontSize: 24,
+    fontSize: 22,
+    color: COLORS.primary,
     fontWeight: 'bold',
   },
   iconWrapper: {
@@ -341,6 +469,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold"
   },
   colorBox: {
     width: 80,
@@ -455,11 +587,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 24,
     alignItems: "center",
-    position: 'absolute',
-    backgroundColor: "white",
-    bottom: 0,
-    left: 0,
-    right: 0,
+    height: 70,
+    // position: 'absolute',
+    // backgroundColor: "white",
+    // bottom: 0,
+    // left: 0,
+    // right: 0,
   },
   addToCartButton: {
     width: 130,

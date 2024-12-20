@@ -1,27 +1,44 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import Home from "../screens/Home";
 import ProductDetail from "../screens/ProductDetail"
+import CartNavigator from "./CartNavigator";
+import Checkout from "../screens/CheckOut";
+import AddressSelection from "../screens/AddressSelection ";
+import AddAddressScreen from "../screens/AddAddress";
+import EditAddressScreen from "../screens/EditAddress";
 
 const Stack = createStackNavigator()
 
 const HomeNavigator = () => {
-    return(
+    return (
         <Stack.Navigator
             initialRouteName="HomeScreen"
         >
-            <Stack.Screen 
+            <Stack.Screen
                 name="HomeScreen"
                 component={Home}
-                options={{headerShown: false}}
+                options={{ headerShown: false }}
             />
-            <Stack.Screen 
+            <Stack.Screen
+                name="CartNavigator"
+                component={CartNavigator}
+                options={{
+                    tabBarVisible: false,
+                    headerShown: false
+                }}
+            />
+            <Stack.Screen
                 name="ProductDetail"
                 component={ProductDetail}
                 options={{
-                    headerStyle : {
-                        borderBottomColor : 'rgba(0,0,0,0.2)',
-                        borderBottomWidth : 1,
-                    },
+                    headerShown: false,
+                }}
+            />
+            <Stack.Screen
+                name="SaleNavigator"
+                component={SaleNavigator}
+                options={{
+                    headerShown: false,
                 }}
             />
         </Stack.Navigator>
