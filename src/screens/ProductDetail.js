@@ -22,7 +22,7 @@ import { getProductByCategory } from '../services/axios/actions/ProductAction';
 const ProductDetail = ({ route, navigation }) => {
 
   const [relatedProducts, setRelatedProducts] = useState([])
-
+  const [selectedItems, setSelectedItems] = useState(new Set()); // Track selected items
 
   useEffect(() => {
     navigation.getParent()?.setOptions({
@@ -115,15 +115,28 @@ const ProductDetail = ({ route, navigation }) => {
     }
   }
 
-  const handleBuyNow = () => {
-    const selectedCartItems = [selectedItem]
-    navigation.navigate('Checkout', {  selectedCartItems });
-    console.log("ProductDetail", selectedCartItems);
-    
-  };
+  const handleBuyNow = async (params) => {
+    console.log('asdfds',selectedItem)
+    const formattedData = [{
+      quantity: 1,
+      totalPrice: selectedPrice, 
+      price: selectedPrice,
+      productName: product.name,
+      productId: product._id,
+      category: product.category,
+      variation: {
+          sku: selectedItem.sku,
+          price: selectedItem.price,
+          stockQuantity: selectedItem.stockQuantity,
+          attributes: selectedItem.attributes,
+          images: selectedItem.images,
+          features: [],
+          specifications: []
+      }
+  }]
   
-
-
+     navigation.navigate('CheckOut', { selectedCartItems:formattedData });
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -333,8 +346,6 @@ const ProductDetail = ({ route, navigation }) => {
 
             ) : (<View></View>)
           }
-
-
 
           <View style={{ width: "100%", alignItems: "center", marginTop: 10 }}>
             <TouchableOpacity style={styles.viewAllReviewsButton} onPress={() => (setShowReviews(!showReviews))}>
