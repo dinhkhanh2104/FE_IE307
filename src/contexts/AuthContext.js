@@ -29,7 +29,6 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       try {
         const response = await getWishlist()
-        console.log("response", response);
         
         setWishlist(response);
       } catch (err) {

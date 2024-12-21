@@ -36,10 +36,11 @@ export const getProductDetail = async (id) => {
 export const getProductByCategory = async (category) => {
     try {
         const response = await axiosInstance.get(`${API_ENDPOINTS.products}/${category}/findByCate`)
-        console.log(`${API_ENDPOINTS.products}/${category}/findByCate`);
-        
+               
         if (response.status === 200) {
-            return response.data
+            console.log(response.data.data);
+            
+            return response.data.data
         }
         else {
             throw new Error("Fail to fetch product by category")

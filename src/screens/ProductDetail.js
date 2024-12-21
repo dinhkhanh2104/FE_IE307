@@ -40,7 +40,9 @@ const ProductDetail = ({ route, navigation }) => {
     const fetchRelatedProduct = async () => {
       try {
         const data = await getProductByCategory(product.category)
-        setRelatedProducts(data)
+        const randomData = [...data].sort(() => 0.5 - Math.random()).slice(0, 4);
+        setRelatedProducts(randomData)
+
       }
       catch (error) {
         console.error(error)
@@ -99,7 +101,6 @@ const ProductDetail = ({ route, navigation }) => {
     }
   };
 
-  console.log("product._id: ", product._id)
 
   const handleAddToWishlist = async (productId) => {
     try {
@@ -371,21 +372,23 @@ const ProductDetail = ({ route, navigation }) => {
           </View>
 
           {/* You Might Like */}
-          {/* <View style={styles.related}>
+          <View style={styles.related}>
           <Text style={styles.sectionTitle}>Đề xuất dành cho bạn</Text>
           <FlatList
-            data={relatedProducts?.sort(() => 0.5 - Math.random()).slice(0, 4)}
+            data={relatedProducts}
+            showsHorizontalScrollIndicator={false}
             horizontal
-            keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
               <View style={styles.relatedItem}>
-                <Image source={item.images[0]} style={styles.relatedImage} />
-                <Text>{item.name}</Text>
-                <Text>{item.variations[0].price}</Text>
+                <Image source={{uri: item.images[0]}} style={styles.relatedImage} />
+                <Text style = {{paddingLeft: 6}}>
+                {item.name.length > 14 ? `${item.name.slice(0, 14)}...` : item.name}
+                </Text>
+                <Text style = {{color: COLORS.primary, fontWeight:'600', paddingLeft: 6}}>{formatCurrency(item.variations[0].price)}</Text>
               </View>
             )}
           />
-        </View> */}
+        </View>
 
         </ScrollView>
 
@@ -595,11 +598,18 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   relatedItem: {
-    marginRight: 16,
+    marginRight: 10,
+    width: 152,
+    borderWidth: 1,
+    borderRadius: 12,
+    borderColor: "gray",
+    paddingBottom: 10,
   },
   relatedImage: {
-    width: 100,
-    height: 100,
+    width: 150,
+    height: 150,
+    borderTopRightRadius: 12,
+    borderTopLeftRadius: 12,
     resizeMode: 'cover',
     marginBottom: 8,
   },
