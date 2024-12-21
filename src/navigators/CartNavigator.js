@@ -1,6 +1,6 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import Cart from "../screens/Cart";
-import Checkout from "../screens/Checkout";
+import Checkout from "../screens/CheckOut";
 import AddressSelection from "../screens/AddressSelection ";
 import AddAddressScreen from "../screens/AddAddress";
 import EditAddressScreen from "../screens/EditAddress";

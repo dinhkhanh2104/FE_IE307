@@ -20,7 +20,7 @@ export const getWishlist = async () => {
 
 export const addToWishlist = async (productId) => {
     try {
-        const response = await axiosInstance.post(API_ENDPOINTS.wishlish, { productId })
+        const response = await axiosInstance.post(API_ENDPOINTS.addToWishlist, { productId })
         if (response.status === 200) {
             // console.log('response:', response.data);
             return response.data
