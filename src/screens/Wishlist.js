@@ -2,14 +2,15 @@ import { SafeAreaView, ScrollView, StyleSheet, Text, View, StatusBar, Image, Fla
 import React, { useState, useEffect } from 'react'
 import CardWishList from '../components/CardWishList'
 
-import Spinner from 'react-native-loading-spinner-overlay';
 import { getWishlist } from '../services/axios/actions/WishlistAction';
 import { deleteWishlist } from '../services/axios/actions/WishlistAction';
 import Loading from '../components/Loading';
+import { useContext } from 'react';
+import AuthContext from '../contexts/AuthContext';
 
 const Wishlist = ({ navigation }) => {
 
-  const [wishlist, setWishlist] = useState([])
+  const { wishlist, setWishlist } = useContext(AuthContext)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleDirectDetail = (product) => {
@@ -17,23 +18,6 @@ const Wishlist = ({ navigation }) => {
   }
   
 
-
-  useEffect(() => {
-    const fetchWishlist = async () => {
-      try {
-        setIsLoading(true)
-        const data = await getWishlist()
-        setWishlist(data)
-      }
-      catch (error) {
-        console.error("Error fetching wishlist", error);
-      }
-      finally {
-        setIsLoading(false)
-      }
-    }
-    fetchWishlist()
-  }, []);
 
   const handleDeleteWishlist = async (productId) => {
     try {

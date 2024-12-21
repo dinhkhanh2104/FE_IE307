@@ -38,7 +38,7 @@ export const getCart = async () => {
 
 export const addToCart = async (sku, id) => {
     try {
-        console.log(`Adding to cart - SKU: ${sku}, ID: ${id}`);
+        // console.log(`Adding to cart - SKU: ${sku}, ID: ${id}`);
 
         const token = await AsyncStorage.getItem('userToken');
         if (!token) {
