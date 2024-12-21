@@ -29,24 +29,32 @@ const Profile = () => {
         <View style={styles.titleText}>
           <Text style={styles.title}>Personal Details</Text>
           <View style={{ gap: 10 }}>
-            <Text>Email Address</Text>
+            <Text>Name</Text>
             <TextInput style={styles.textInputField} />
           </View>
           <View style={{ gap: 10 }}>
-            <Text>Password</Text>
+            <Text>Phone number</Text>
             <TextInput style={styles.textInputField} />
             <Text style={styles.textChangePasss}>Change Password</Text>
           </View>
         </View>
 
         <View style={styles.titleText}>
-          <Text style={styles.title}>Business Address Details</Text>
+          <Text style={styles.title}>Address Details</Text>
           <View style={{ gap: 10 }}>
             <Text>Address</Text>
             <TextInput style={styles.textInputField} />
           </View>
           <View style={{ gap: 10 }}>
+            <Text>Ward</Text>
+            <TextInput style={styles.textInputField} />
+          </View>
+          <View style={{ gap: 10 }}>
             <Text>City</Text>
+            <TextInput style={styles.textInputField} />
+          </View>
+          <View style={{ gap: 10 }}>
+            <Text>Country</Text>
             <TextInput style={styles.textInputField} />
           </View>
         </View>
@@ -58,7 +66,7 @@ const Profile = () => {
             <TextInput style={styles.textInputField} />
           </View>
           <View style={{ gap: 10 }}>
-            <Text>Password</Text>
+            <Text>Name of Bank</Text>
             <TextInput style={styles.textInputField} />
           </View>
         </View>
@@ -82,10 +90,11 @@ const styles = StyleSheet.create({
     paddingTop: StatusBar.currentHeight + 20 || 0,
     paddingHorizontal: 20,
   },
-
+  
   wrapper: {
     flexDirection: "column",
-    gap: 20
+    gap: 20,
+    paddingBottom: 20,
   },
 
   buttonWrapper: {

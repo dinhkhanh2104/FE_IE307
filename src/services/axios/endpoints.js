@@ -1,3 +1,5 @@
+import { addToWishlist } from "./actions/WishlistAction";
+
 export const API_ENDPOINTS = {
 
     login: "/user/login",
@@ -7,7 +9,9 @@ export const API_ENDPOINTS = {
     products: '/product',
     category: "/category",
     addCart: "/cart/add",
-    
+    wishlish: "/wishlist",
+    addToWishlist: "/wishlist/add-to-wishlist/",
+    deleteWishlist: "/wishlist/remove-from-wishlist/",
 
     // userCart: "/carts/",
 }

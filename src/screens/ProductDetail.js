@@ -17,6 +17,7 @@ import { addToCart } from '../services/axios/actions/CartAction';
 
 import AuthContext from '../contexts/AuthContext';
 import { getProductByCategory } from '../services/axios/actions/ProductAction';
+import { addToWishlist } from '../services/axios/actions/WishlistAction';
 
 
 const ProductDetail = ({ route, navigation }) => {
@@ -48,15 +49,15 @@ const ProductDetail = ({ route, navigation }) => {
     fetchRelatedProduct()
   }, []);
 
-  const { fetchCart } = useContext(AuthContext)
+  const { fetchCart, fetchWishlist } = useContext(AuthContext)
 
   const { product } = route.params
 
 
-  const images = [...product.images, ...product.variations.flatMap(variation => variation.images)]
+  const images = [...product?.images, ...product?.variations.flatMap(variation => variation.images)]
   const price = product.variations[0].price
 
-  const colors = product.variations.map(variation => {
+  const colors = product?.variations.map(variation => {
     const colorAttribute = variation.attributes.find(attr => attr.attributeName === "Màu sắc");
     return colorAttribute ? colorAttribute.values[0] : null;
   });
@@ -81,13 +82,13 @@ const ProductDetail = ({ route, navigation }) => {
     setActiveImageIndex(index);
   };
 
-  const selectedVariation = product.variations.find(variation =>
+  const selectedVariation = product?.variations.find(variation =>
     variation.attributes.some(attr => attr.attributeName === "Màu sắc" && attr.values.includes(selectedColor))
   );
 
   const handleColorChange = (color) => {
     setSelectedColor(color);
-    const variation = product.variations.find(variation =>
+    const variation = product?.variations.find(variation =>
       variation.attributes.some(attr => attr.attributeName === "Màu sắc" && attr.values.includes(color))
     );
     if (variation) {
@@ -98,11 +99,26 @@ const ProductDetail = ({ route, navigation }) => {
     }
   };
 
+  console.log("product._id: ", product._id)
 
+  const handleAddToWishlist = async (productId) => {
+    try {
+      const response = await addToWishlist(productId)
+      Toast.show({
+        type: 'success',
+        text1: "Add to wishlist successfully",
+      });
+      await fetchWishlist()
+    }
+    catch (error) {
+      console.error("Error", error);
+      Toast.show({ type: 'error', text1: "Add to wishlist failed. Please try again." });
+    }
+  }
 
   const handleAddToCart = async () => {
     try {
-      const response = await addToCart(selectedItem.sku, product._id)
+      const response = await addToCart(selectedItem.sku, product?._id)
       Toast.show({
         type: 'success',
         text1: "Add to cart successfully",
@@ -116,247 +132,246 @@ const ProductDetail = ({ route, navigation }) => {
   }
 
   const handleBuyNow = async (params) => {
-    console.log('asdfds',selectedItem)
+    console.log('asdfds', selectedItem)
     const formattedData = [{
       quantity: 1,
-      totalPrice: selectedPrice, 
+      totalPrice: selectedPrice,
       price: selectedPrice,
-      productName: product.name,
-      productId: product._id,
-      category: product.category,
+      productName: product?.name,
+      productId: product?._id,
+      category: product?.category,
       variation: {
-          sku: selectedItem.sku,
-          price: selectedItem.price,
-          stockQuantity: selectedItem.stockQuantity,
-          attributes: selectedItem.attributes,
-          images: selectedItem.images,
-          features: [],
-          specifications: []
+        sku: selectedItem.sku,
+        price: selectedItem.price,
+        stockQuantity: selectedItem.stockQuantity,
+        attributes: selectedItem.attributes,
+        images: selectedItem.images,
+        features: [],
+        specifications: []
       }
-  }]
-  
-     navigation.navigate('CheckOut', { selectedCartItems:formattedData });
+    }]
+
+    navigation.navigate('CheckOut', { selectedCartItems: formattedData });
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.wrapper}
-        showsVerticalScrollIndicator={false}
-      >
-        <Toast
-          position='top'
-          topOffset={20}
-        />
+    <>
 
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-back" size={30} color={COLORS.black} />
-        </TouchableOpacity>
+      <SafeAreaView style={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.wrapper}
+          showsVerticalScrollIndicator={false}
+        >
 
-        <View style={styles.imageSlider}>
-          <FlatList
-            data={selectedVariation ? selectedVariation.images : images}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            pagingEnabled
-            keyExtractor={(_, index) => index.toString()}
-            onScroll={handleImageScroll}
-            renderItem={({ item }) => (
-              <Image source={{ uri: item }} style={styles.productImage} />
-            )}
-          />
-          <View style={styles.pagination}>
-            {selectedVariation ? selectedVariation.images.map((_, index) => (
-              <View
-                key={index}
-                style={[styles.dot, activeImageIndex === index && styles.activeDot]}
-              />
-            )) : images.map((_, index) => (
-              <View
-                key={index}
-                style={[styles.dot, activeImageIndex === index && styles.activeDot]}
-              />
-            ))}
-          </View>
-        </View>
 
-        <View style={styles.productInfo}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <Text style={styles.price}>{formatCurrency(selectedPrice)}</Text>
-            <View style={styles.iconWrapper}>
-              <Icon name='share-a' type='fontisto' size={14} color={"#B5A2A2"} />
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Icon name="arrow-back" size={30} color={COLORS.black} />
+          </TouchableOpacity>
+
+          <View style={styles.imageSlider}>
+            <FlatList
+              data={selectedVariation ? selectedVariation.images : images}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              pagingEnabled
+              keyExtractor={(_, index) => index.toString()}
+              onScroll={handleImageScroll}
+              renderItem={({ item }) => (
+                <Image source={{ uri: item }} style={styles.productImage} />
+              )}
+            />
+            <View style={styles.pagination}>
+              {selectedVariation ? selectedVariation.images.map((_, index) => (
+                <View
+                  key={index}
+                  style={[styles.dot, activeImageIndex === index && styles.activeDot]}
+                />
+              )) : images.map((_, index) => (
+                <View
+                  key={index}
+                  style={[styles.dot, activeImageIndex === index && styles.activeDot]}
+                />
+              ))}
             </View>
           </View>
-          <Text style={styles.title}>{product.name}</Text>
-          <Text style={styles.description}>{product.description}</Text>
-        </View>
 
-        {/* Phần màu sắc (variations) */}
-        <View style={styles.variations}>
-          <Text style={styles.sectionTitle}>Màu sắc</Text>
-          <FlatList
-            data={colors}
-            horizontal
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.colorBox,
-                  selectedColor === item && styles.selectedVariation,
-                ]}
-                onPress={() => handleColorChange(item)}
-              >
-                <Text style={styles.variationText}>{item}</Text>
-              </TouchableOpacity>
-            )}
-          />
-        </View>
-
-        {/* Specifications */}
-        <View style={styles.specifications}>
-          <Text style={styles.sectionTitle}>Specifications</Text>
-          <Text style={{ color: 'black', fontSize: 18, fontWeight: "600" }}>Material </Text>
-          <View style={{ flexDirection: "row", gap: 10, marginVertical: 10, }}>
-
-            <View style={styles.materialWrapper}>
-              <Text style={{ color: "black", fontWeight: "500" }}> Cotton 95% </Text>
-            </View>
-            <View style={styles.materialWrapper}>
-              <Text style={{ color: "black", fontWeight: "500" }}> Nylon 5%</Text>
-            </View >
-            <View style={styles.materialWrapper}>
-              <Text style={{ color: "black", fontWeight: "500" }}>Wool 80%</Text>
-            </View >
-
-          </View>
-
-          <Text style={{ color: 'black', fontSize: 18, fontWeight: "600", marginBottom: 10, }}>Origin </Text>
-          <View style={[styles.materialWrapper, { backgroundColor: "#E5EBFC" }]}>
-            <Text style={{ color: "black", fontWeight: "500" }}> Viet Nam </Text>
-          </View>
-
-        </View>
-
-        {/* Delivery */}
-        <View style={styles.delivery}>
-          <Text style={styles.sectionTitle}>Delivery</Text>
-
-          <View style={styles.deliveryWrapper}>
-            <Text style={{ fontSize: 16, fontWeight: 500, width: 100, }}>Tiêu chuẩn</Text>
-            <View style={styles.deliveryInfo}>
-              <Text style={{ color: "#004CFF", fontWeight: "500", }}>3 - 5 ngày</Text>
-            </View>
-            <Text style={{ color: "black", fontWeight: "700", fontSize: 16 }}>30.000đ</Text>
-          </View>
-
-          <View style={styles.deliveryWrapper}>
-            <Text style={{ fontSize: 16, fontWeight: 500, width: 100, }}>Hỏa Tốc</Text>
-            <View style={styles.deliveryInfo}>
-              <Text style={{ color: "#004CFF", fontWeight: "500", }}>1 - 2 ngày</Text>
-            </View>
-            <Text style={{ color: "black", fontWeight: "700", fontSize: 16 }}>60.000đ</Text>
-          </View>
-
-
-        </View>
-
-        {/* Rating & Reviews */}
-        <View style={styles.reviews}>
-          <Text style={styles.sectionTitle}>Rating & Reviews</Text>
-
-
-          <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
-            <View style={{ flexDirection: "row" }}>
-              {
-                Array.from({ length: 5 }).map((_, index) => {
-                  const isFullStar = index < Math.floor(product.rating);
-                  const isHalfStar = index === Math.floor(product.rating) && product.rating % 1 !== 0;
-
-                  return (
-                    <Icon
-                      key={index}
-                      name={isFullStar ? 'star' : isHalfStar ? 'star-half' : 'star-outline'}
-                      type='Ionicons'
-                      color={isFullStar || isHalfStar ? "#EDB310" : "#BBBBBB"}
-                      size={20}
-                    />
-                  );
-                })
-              }
-            </View>
-            <View style={[styles.materialWrapper, { backgroundColor: "#E5EBFC", width: 60, height: 30 }]}>
-              <Text style={{ fontWeight: 500, fontSize: 14 }}>{product.rating} / 5</Text>
-            </View>
-
-          </View>
-
-
-          <View style={styles.reviewItem}>
-            <View style={{ flexDirection: "row", marginTop: 10 }}>
-              <Image source={require('../../assets/images/avatar-1.jpg')} style={styles.reviewerImage} />
-              <View>
-                <Text style={{ fontWeight: "500", fontSize: 16 }} >Veronika</Text>
-                <View style={{ flexDirection: "row" }}>
-                  <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-                  <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-                  <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-                  <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-                  <Icon name='star' type='feather' color={"#ECA61B"} size={20} />
-                </View>
+          <View style={styles.productInfo}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+              <Text style={styles.price}>{formatCurrency(selectedPrice)}</Text>
+              <View style={styles.iconWrapper}>
+                <Icon name='share-a' type='fontisto' size={14} color={"#B5A2A2"} />
               </View>
             </View>
-            <Text style={{ fontSize: 15, marginLeft: 50, }}>Great product, loved it!</Text>
+            <Text style={styles.title}>{product?.name}</Text>
+            <Text style={styles.description}>{product?.description}</Text>
           </View>
-          {
-            showReviews ? (
-              <>
-                <View style={styles.reviewItem}>
-                  <View style={{ flexDirection: "row", marginTop: 10 }}>
-                    <Image source={require('../../assets/images/avatar-2.jpg')} style={styles.reviewerImage} />
-                    <View>
-                      <Text style={{ fontWeight: "500", fontSize: 16 }} >Huệ Nguyễn</Text>
-                      <View style={{ flexDirection: "row" }}>
-                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-                      </View>
-                    </View>
-                  </View>
-                  <Text style={{ fontSize: 15, marginLeft: 50, }}>Sản phẩm chất lượng cao, rất đáng trải nghiệm</Text>
-                </View>
-                <View style={styles.reviewItem}>
-                  <View style={{ flexDirection: "row", marginTop: 10 }}>
-                    <Image source={require('../../assets/images/avatar-3.jpg')} style={styles.reviewerImage} />
-                    <View>
-                      <Text style={{ fontWeight: "500", fontSize: 16 }} >Khánh Đình</Text>
-                      <View style={{ flexDirection: "row" }}>
-                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-                        <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
-                      </View>
-                    </View>
-                  </View>
-                  <Text style={{ fontSize: 15, marginLeft: 50, }}>Mình rất hài lòng khi mua sản phẩm</Text>
-                </View>
-              </>
-
-            ) : (<View></View>)
-          }
-
-          <View style={{ width: "100%", alignItems: "center", marginTop: 10 }}>
-            <TouchableOpacity style={styles.viewAllReviewsButton} onPress={() => (setShowReviews(!showReviews))}>
-              <Text style={styles.viewAllText}> {!showReviews ? "View All Reviews" : "Hide All Reviews"}</Text>
-            </TouchableOpacity>
+          ?
+          {/* Phần màu sắc (variations) */}
+          <View style={styles.variations}>
+            <Text style={styles.sectionTitle}>Màu sắc</Text>
+            <FlatList
+              data={colors}
+              horizontal
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.colorBox,
+                    selectedColor === item && styles.selectedVariation,
+                  ]}
+                  onPress={() => handleColorChange(item)}
+                >
+                  <Text style={styles.variationText}>{item}</Text>
+                </TouchableOpacity>
+              )}
+            />
           </View>
 
-        </View>
+          {/* Specifications */}
+          <View style={styles.specifications}>
+            <Text style={styles.sectionTitle}>Specifications</Text>
+            <Text style={{ color: 'black', fontSize: 18, fontWeight: "600" }}>Material </Text>
+            <View style={{ flexDirection: "row", gap: 10, marginVertical: 10, }}>
 
-        {/* You Might Like */}
-        {/* <View style={styles.related}>
+              <View style={styles.materialWrapper}>
+                <Text style={{ color: "black", fontWeight: "500" }}> Cotton 95% </Text>
+              </View>
+              <View style={styles.materialWrapper}>
+                <Text style={{ color: "black", fontWeight: "500" }}> Nylon 5%</Text>
+              </View >
+              <View style={styles.materialWrapper}>
+                <Text style={{ color: "black", fontWeight: "500" }}>Wool 80%</Text>
+              </View >
+
+            </View>
+
+            <Text style={{ color: 'black', fontSize: 18, fontWeight: "600", marginBottom: 10, }}>Origin </Text>
+            <View style={[styles.materialWrapper, { backgroundColor: "#E5EBFC" }]}>
+              <Text style={{ color: "black", fontWeight: "500" }}> Viet Nam </Text>
+            </View>
+
+          </View>
+
+          {/* Delivery */}
+          <View style={styles.delivery}>
+            <Text style={styles.sectionTitle}>Delivery</Text>
+
+            <View style={styles.deliveryWrapper}>
+              <Text style={{ fontSize: 16, fontWeight: 500, width: 100, }}>Tiêu chuẩn</Text>
+              <View style={styles.deliveryInfo}>
+                <Text style={{ color: "#004CFF", fontWeight: "500", }}>3 - 5 ngày</Text>
+              </View>
+              <Text style={{ color: "black", fontWeight: "700", fontSize: 16 }}>30.000đ</Text>
+            </View>
+
+            <View style={styles.deliveryWrapper}>
+              <Text style={{ fontSize: 16, fontWeight: 500, width: 100, }}>Hỏa Tốc</Text>
+              <View style={styles.deliveryInfo}>
+                <Text style={{ color: "#004CFF", fontWeight: "500", }}>1 - 2 ngày</Text>
+              </View>
+              <Text style={{ color: "black", fontWeight: "700", fontSize: 16 }}>60.000đ</Text>
+            </View>
+
+
+          </View>
+
+          {/* Rating & Reviews */}
+          <View style={styles.reviews}>
+            <Text style={styles.sectionTitle}>Rating & Reviews</Text>
+
+
+            <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+              <View style={{ flexDirection: "row" }}>
+                {
+                  Array.from({ length: 5 }).map((_, index) => {
+                    const isFullStar = index < Math.floor(product?.rating);
+                    const isHalfStar = index === Math.floor(product?.rating) && product?.rating % 1 !== 0;
+
+                    return (
+                      <Icon
+                        key={index}
+                        name={isFullStar ? 'star' : isHalfStar ? 'star-half' : 'star-outline'}
+                        type='Ionicons'
+                        color={isFullStar || isHalfStar ? "#EDB310" : "#BBBBBB"}
+                        size={20}
+                      />
+                    );
+                  })
+                }
+              </View>
+              <View style={[styles.materialWrapper, { backgroundColor: "#E5EBFC", width: 60, height: 30 }]}>
+                <Text style={{ fontWeight: 500, fontSize: 14 }}>{product?.rating} / 5</Text>
+              </View>
+
+            </View>
+
+
+            <View style={styles.reviewItem}>
+              <View style={{ flexDirection: "row", marginTop: 10 }}>
+                <Image source={require('../../assets/images/avatar-1.jpg')} style={styles.reviewerImage} />
+                <View>
+                  <Text style={{ fontWeight: "500", fontSize: 16 }} >Veronika</Text>
+                  <View style={{ flexDirection: "row" }}>
+                    <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                    <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                    <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                    <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                    <Icon name='star' type='feather' color={"#ECA61B"} size={20} />
+                  </View>
+                </View>
+              </View>
+              <Text style={{ fontSize: 15, marginLeft: 50, }}>Great product, loved it!</Text>
+            </View>
+            {
+              showReviews ? (
+                <>
+                  <View style={styles.reviewItem}>
+                    <View style={{ flexDirection: "row", marginTop: 10 }}>
+                      <Image source={require('../../assets/images/avatar-2.jpg')} style={styles.reviewerImage} />
+                      <View>
+                        <Text style={{ fontWeight: "500", fontSize: 16 }} >Huệ Nguyễn</Text>
+                        <View style={{ flexDirection: "row" }}>
+                          <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                          <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                          <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                          <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                          <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        </View>
+                      </View>
+                    </View>
+                    <Text style={{ fontSize: 15, marginLeft: 50, }}>Sản phẩm chất lượng cao, rất đáng trải nghiệm</Text>
+                  </View>
+                  <View style={styles.reviewItem}>
+                    <View style={{ flexDirection: "row", marginTop: 10 }}>
+                      <Image source={require('../../assets/images/avatar-3.jpg')} style={styles.reviewerImage} />
+                      <View>
+                        <Text style={{ fontWeight: "500", fontSize: 16 }} >Khánh Đình</Text>
+                        <View style={{ flexDirection: "row" }}>
+                          <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                          <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                          <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                          <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                          <Icon name='star' type='FontAwesome' color={"#ECA61B"} size={20} />
+                        </View>
+                      </View>
+                    </View>
+                    <Text style={{ fontSize: 15, marginLeft: 50, }}>Mình rất hài lòng khi mua sản phẩm</Text>
+                  </View>
+                </>
+
+              ) : (<View></View>)
+            }
+
+            <View style={{ width: "100%", alignItems: "center", marginTop: 10 }}>
+              <TouchableOpacity style={styles.viewAllReviewsButton} onPress={() => (setShowReviews(!showReviews))}>
+                <Text style={styles.viewAllText}> {!showReviews ? "View All Reviews" : "Hide All Reviews"}</Text>
+              </TouchableOpacity>
+            </View>
+
+          </View>
+
+          {/* You Might Like */}
+          {/* <View style={styles.related}>
           <Text style={styles.sectionTitle}>Đề xuất dành cho bạn</Text>
           <FlatList
             data={relatedProducts?.sort(() => 0.5 - Math.random()).slice(0, 4)}
@@ -372,23 +387,29 @@ const ProductDetail = ({ route, navigation }) => {
           />
         </View> */}
 
-      </ScrollView>
+        </ScrollView>
 
-      {/* Buttons */}
-      <View style={styles.actions}>
-        {/* <Icon name="heart" type="octicon" size={40} color={COLORS.black} /> */}
-        <Icon name="heart-fill" type="octicon" size={40} color={COLORS.primary} />
+        {/* Buttons */}
+        <View style={styles.actions}>
+          {/* <Icon name="heart" type="octicon" size={40} color={COLORS.black} /> */}
+          <TouchableOpacity onPress={() => handleAddToWishlist(product._id)}>
+            <Icon name="heart-fill" type="octicon" size={40} color={COLORS.primary} />
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.addToCartButton} onPress={handleAddToCart}>
-          <Text style={styles.addToCartText}>Add to cart</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.addToCartButton} onPress={handleAddToCart}>
+            <Text style={styles.addToCartText}>Add to cart</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buyNowButton} onPress={handleBuyNow}>
-          <Text style={styles.buyNowText}>Buy now</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity style={styles.buyNowButton} onPress={handleBuyNow}>
+            <Text style={styles.buyNowText}>Buy now</Text>
+          </TouchableOpacity>
+        </View>
 
-    </SafeAreaView >
+      </SafeAreaView >
+      <Toast
+        position='top'
+      />
+    </>
   );
 };
 

@@ -7,6 +7,8 @@ import AddressSelection from "../screens/AddressSelection ";
 import AddAddressScreen from "../screens/AddAddress";
 import EditAddressScreen from "../screens/EditAddress";
 import SaleNavigator from "./SaleNavigator";
+import Search from "../screens/Search";
+
 
 const Stack = createStackNavigator()
 
@@ -53,21 +55,28 @@ const HomeNavigator = () => {
                 name="AddressSelection"
                 component={AddressSelection}
                 options={{
-                headerShown:false
+                    headerShown: false
                 }}
             />
             <Stack.Screen
                 name="AddAddress"
                 component={AddAddressScreen}
                 options={{
-                headerShown:false
+                    headerShown: false
                 }}
             />
             <Stack.Screen
                 name="EditAddress"
                 component={EditAddressScreen}
                 options={{
-                headerShown:false
+                    headerShown: false
+                }}
+            />
+            <Stack.Screen
+                name="Search"
+                component={Search}
+                options={{
+                    headerShown: false
                 }}
             />
         </Stack.Navigator>

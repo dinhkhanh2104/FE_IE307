@@ -25,24 +25,7 @@ const Cart = ({ navigation }) => {
   const [cartItems, setCartItems] = useState(cart); // Local state to manage UI
   const [selectedItems, setSelectedItems] = useState(new Set()); // Track selected items
 
-  const [wishlistItems] = useState([
-    {
-      id: '3',
-      image: 'https://via.placeholder.com/80',
-      title: 'Lorem ipsum dolor sit amet consectetuer.',
-      price: 17.0,
-      size: 'M',
-      color: 'Pink',
-    },
-    {
-      id: '4',
-      image: 'https://via.placeholder.com/80',
-      title: 'Lorem ipsum dolor sit amet consectetuer.',
-      price: 17.0,
-      size: 'M',
-      color: 'Pink',
-    },
-  ]);
+  const { wishlist } = useContext(AuthContext);
 
 
   const updateCart = async (sku, quantity, productId) => {
@@ -206,19 +189,8 @@ const Cart = ({ navigation }) => {
             </View>
           )}
 
-          {/* Wishlist Section */}
-          <Text style={styles.sectionTitle}>From Your Wishlist</Text>
-          <FlatList
-            scrollEnabled={false}
-            data={wishlistItems}
-            renderItem={({ item }) => (
-              <View style={{ margin: 16 }}>
-                <CardWishList />
-              </View>
-            )}
-            keyExtractor={(item) => item.id}
-            style={styles.cartList}
-          />
+         
+         
         </ScrollView>
 
         {/* Fixed Total and Checkout */}
