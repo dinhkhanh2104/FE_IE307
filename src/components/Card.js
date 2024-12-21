@@ -12,6 +12,8 @@ const Card = ({ data, onPress, isDiscounted = false }) => {
         }).format(amount);
     };
 
+    const discountRandom = Math.floor(Math.random() * 40) + 11;
+
     return (
         <TouchableOpacity
             style={styles.cardContainer}
@@ -22,7 +24,7 @@ const Card = ({ data, onPress, isDiscounted = false }) => {
                     source={{ uri: data.images[0] }}
                     style={styles.cardImage}
                 />
-                {isDiscounted ? (<Text style={styles.cardPercentSale}> - 40%</Text>) : <Text></Text> }   
+                {isDiscounted ? (<Text style={styles.cardPercentSale}> - {discountRandom}%</Text>) : <Text></Text> }   
             </View>
 
             <View style={{ paddingHorizontal: 8, gap: 10 }}>

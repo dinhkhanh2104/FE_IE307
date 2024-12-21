@@ -48,7 +48,7 @@ const EditAddressScreen = () => {
           },
         });
 
-        console.log(response)
+        // console.log(response)
 
         if (!response.ok) {
           throw new Error('Không thể tải thông tin địa chỉ');
