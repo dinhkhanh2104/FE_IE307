@@ -2,13 +2,13 @@ import { SafeAreaView, StyleSheet, Text, View, ScrollView, FlatList, TouchableOp
 import React, { useState, useEffect } from 'react';
 import { getProducts } from '../services/axios/actions/ProductAction';
 import { getCategories } from '../services/axios/actions/Categories';
-import Spinner from 'react-native-loading-spinner-overlay';
 import Card from '../components/Card';
 import { COLORS } from '../constants/theme';
+import Loading from '../components/Loading';
 
-const Categories = ({navigation}) => {
+const Categories = ({ navigation }) => {
 
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -21,6 +21,7 @@ const Categories = ({navigation}) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const productsData = await getProducts();
         setProducts(productsData);
 
@@ -33,7 +34,7 @@ const Categories = ({navigation}) => {
       } catch (error) {
         console.error(error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -52,42 +53,45 @@ const Categories = ({navigation}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Spinner size={'large'} visible={loading} />
-      <ScrollView
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoryWrapper}
-        horizontal
-      >
-        {categories.map((item, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.categoryItem}
-            onPress={() => setCategoryChoosen(item._id)}
+      {isLoading ? (<Loading />) : (
+        <>
+          <ScrollView
+            showsHorizontalScrollIndicator={false}
+            style={styles.categoryWrapper}
+            horizontal
           >
-            <Image
-              source={{ uri: item.image }}
-              style={styles.categoryImage}
-            />
-            <Text
-              style={{
-                fontWeight: '500',
-                color: categoryChoosen === item._id ? COLORS.primary : 'black'
-              }}
-            >{item.name}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-      <FlatList
-        style = {{paddingVertical: 10}}
-        data={filteredProducts}
-        keyExtractor={(item) => item._id}
-        showsVerticalScrollIndicator = {false}
-        renderItem={
-          ({ item }) => <Card data={item}  onPress={() => { directProductDetail(item) }} />
-        }
-        numColumns={2}
-        columnWrapperStyle={{ justifyContent: "space-between" }}
-      />
+            {categories.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.categoryItem}
+                onPress={() => setCategoryChoosen(item._id)}
+              >
+                <Image
+                  source={{ uri: item.image }}
+                  style={styles.categoryImage}
+                />
+                <Text
+                  style={{
+                    fontWeight: '500',
+                    color: categoryChoosen === item._id ? COLORS.primary : 'black'
+                  }}
+                >{item.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+          <FlatList
+            style={{ paddingVertical: 10 }}
+            data={filteredProducts}
+            keyExtractor={(item) => item._id}
+            showsVerticalScrollIndicator={false}
+            renderItem={
+              ({ item }) => <Card data={item} onPress={() => { directProductDetail(item) }} />
+            }
+            numColumns={2}
+            columnWrapperStyle={{ justifyContent: "space-between" }}
+          />
+        </>
+      )}
     </SafeAreaView>
   );
 };

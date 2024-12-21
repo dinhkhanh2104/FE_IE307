@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect } from "react";
 import { getCart } from "../services/axios/actions/CartAction";
 import { getAddress } from "../services/axios/actions/AddressAction"; // Assuming you have this action for fetching address
+import { getWishlist } from "../services/axios/actions/WishlistAction";
 
 const AuthContext = createContext({});
 
@@ -8,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState('');
   const [cart, setCart] = useState([]);
   const [address, setAddress] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
 
   // Function to fetch cart data
   const fetchCart = async () => {
@@ -22,6 +24,19 @@ export const AuthProvider = ({ children }) => {
       }
     }
   };
+
+  const fetchWishlist = async () => {
+    if (token) {
+      try {
+        const response = await getWishlist()
+        console.log("response", response);
+        
+        setWishlist(response);
+      } catch (err) {
+        console.error("Error fetching wishlist:", err);
+      }
+    }
+  }
 
   // Function to fetch address data
   const fetchAddress = async () => {
@@ -39,6 +54,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       fetchCart(); // Fetch cart when token changes
+      fetchWishlist();
       fetchAddress(); // Fetch address when token changes
     }
   }, [token]);
@@ -54,6 +70,8 @@ export const AuthProvider = ({ children }) => {
         setAddress,
         fetchCart,
         fetchAddress,
+        wishlist,
+        setWishlist
       }}
     >
       {children}

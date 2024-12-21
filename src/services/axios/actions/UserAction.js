@@ -10,3 +10,5 @@ export const login = async (email, password) => {
 export const register = async ( email, password) => {
     return axiosInstance.post(API_ENDPOINTS.register, {username: "test3", email, password})
 }
+
+expo
