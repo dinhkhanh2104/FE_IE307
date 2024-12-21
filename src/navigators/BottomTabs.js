@@ -14,7 +14,6 @@ const Tab = createBottomTabNavigator()
 
 export default function BottomTabs() {
     
-    const {wishlist} = useContext(AuthContext)
 
     return (
         <Tab.Navigator

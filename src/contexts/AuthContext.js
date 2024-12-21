@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [address, setAddress] = useState([]);
   const [wishlist, setWishlist] = useState([]);
+  const [role, setRole] = useState('');
 
   // Function to fetch cart data
   const fetchCart = async () => {
@@ -69,8 +70,11 @@ export const AuthProvider = ({ children }) => {
         setAddress,
         fetchCart,
         fetchAddress,
+        fetchWishlist,
         wishlist,
-        setWishlist
+        setWishlist,
+        role,
+        setRole
       }}
     >
       {children}

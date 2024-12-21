@@ -105,15 +105,23 @@ const ProductDetail = ({ route, navigation }) => {
   const handleAddToWishlist = async (productId) => {
     try {
       const response = await addToWishlist(productId)
+      if (response.message === "Product already in wishlist") {
+        Toast.show({
+          type: 'info',
+          text1: "Sản phẩm đã có trong danh sách yêu thích",
+        });
+      }
+      else {
       Toast.show({
-        type: 'success',
-        text1: "Add to wishlist successfully",
-      });
-      await fetchWishlist()
+          type: 'success',
+          text1: "Thêm vào danh sách yêu thích thành công",
+        });
+        await fetchWishlist()
+      }
     }
     catch (error) {
-      console.error("Error", error);
-      Toast.show({ type: 'error', text1: "Add to wishlist failed. Please try again." });
+      console.error("Error from detail: ", error.response.status);
+      Toast.show({ type: 'error', text1: "Thêm vào danh sách yêu thích thất bại. Vui lòng thử lại." });
     }
   }
 
@@ -133,7 +141,7 @@ const ProductDetail = ({ route, navigation }) => {
   }
 
   const handleBuyNow = async (params) => {
-    console.log('asdfds', selectedItem)
+    // console.log('asdfds', selectedItem)
     const formattedData = [{
       quantity: 1,
       totalPrice: selectedPrice,
@@ -373,22 +381,22 @@ const ProductDetail = ({ route, navigation }) => {
 
           {/* You Might Like */}
           <View style={styles.related}>
-          <Text style={styles.sectionTitle}>Đề xuất dành cho bạn</Text>
-          <FlatList
-            data={relatedProducts}
-            showsHorizontalScrollIndicator={false}
-            horizontal
-            renderItem={({ item }) => (
-              <View style={styles.relatedItem}>
-                <Image source={{uri: item.images[0]}} style={styles.relatedImage} />
-                <Text style = {{paddingLeft: 6}}>
-                {item.name.length > 14 ? `${item.name.slice(0, 14)}...` : item.name}
-                </Text>
-                <Text style = {{color: COLORS.primary, fontWeight:'600', paddingLeft: 6}}>{formatCurrency(item.variations[0].price)}</Text>
-              </View>
-            )}
-          />
-        </View>
+            <Text style={styles.sectionTitle}>Đề xuất dành cho bạn</Text>
+            <FlatList
+              data={relatedProducts}
+              showsHorizontalScrollIndicator={false}
+              horizontal
+              renderItem={({ item }) => (
+                <View style={styles.relatedItem}>
+                  <Image source={{ uri: item.images[0] }} style={styles.relatedImage} />
+                  <Text style={{ paddingLeft: 6 }}>
+                    {item.name.length > 14 ? `${item.name.slice(0, 14)}...` : item.name}
+                  </Text>
+                  <Text style={{ color: COLORS.primary, fontWeight: '600', paddingLeft: 6 }}>{formatCurrency(item.variations[0].price)}</Text>
+                </View>
+              )}
+            />
+          </View>
 
         </ScrollView>
 

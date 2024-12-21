@@ -3,7 +3,7 @@ import {
     TextInput, TouchableOpacity, StatusBar,
     ScrollView, FlatList, Image
 } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Icon } from 'react-native-elements'
 import { COLORS, SIZES } from '../constants/theme'
 
@@ -20,6 +20,7 @@ const Search = ({ route, navigation }) => {
     //     };
     // }, [navigation]);
 
+    const [searchText, setSearchText] = useState('')
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('vi-VN', {
             style: 'currency',
@@ -28,10 +29,10 @@ const Search = ({ route, navigation }) => {
     };
 
     const { products } = route.params
-    console.log(products);
+    // console.log(products);
 
     const popularProducts = [...products].sort(() => 0.5 - Math.random()).slice(0, 8);
-    console.log(popularProducts);
+    // console.log(popularProducts);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -42,6 +43,7 @@ const Search = ({ route, navigation }) => {
                     placeholderTextColor={"#BBBBBB"}
                     cursorColor={COLORS.lightGray}
                     style={styles.textInput}
+                    onChangeText={(value) => setSearchText(value)}
                 />
                 <TouchableOpacity>
                     <Icon name='mic' type='feather' color={"#BBBBBB"} size={24} />

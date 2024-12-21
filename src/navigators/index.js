@@ -3,12 +3,16 @@ import AuthStack from "./AuthStack";
 import { useContext } from "react";
 import BottomTabs from "./BottomTabs"
 import AuthContext from "../contexts/AuthContext";
+import AdminNavigator from "./AdminNavigator";
 
 export default function Navigators() {
-    const { token } = useContext(AuthContext)
-    return (
-        <NavigationContainer>
-            {token ? <BottomTabs /> : <AuthStack />}
-        </NavigationContainer>
-    )
+
+    const { token, role } = useContext(AuthContext)
+
+return (
+    <NavigationContainer>
+        {/* {token ? ( role === "admin" ? <AdminNavigator /> : <BottomTabs />) : <AuthStack />} */}
+        {token ? (  <BottomTabs />) : <AuthStack />}
+    </NavigationContainer>
+)
 }

@@ -22,9 +22,10 @@ export const addToWishlist = async (productId) => {
     try {
         const response = await axiosInstance.post(API_ENDPOINTS.addToWishlist, { productId })
         if (response.status === 200) {
-            // console.log('response:', response.data);
+            console.log('response:', response.data);
             return response.data
         }
+
         else {
             throw new Error("Fail to add wishlist")
         }
@@ -37,7 +38,7 @@ export const addToWishlist = async (productId) => {
 
 export const deleteWishlist = async (productId) => {
     try {
-        const response = await axiosInstance.post(API_ENDPOINTS.deleteWishlist, {productId})
+        const response = await axiosInstance.post(API_ENDPOINTS.deleteWishlist, { productId })
         if (response.status === 200) {
             console.log('response:', response.data);
             return response.data

@@ -3,7 +3,7 @@ import { API_ENDPOINTS } from "../endpoints";
 
 
 export const login = async (email, password) => {
-    console.log("Attempting to login with", email, password);
+    console.log("Login with", email, password);
     return axiosInstance.post(API_ENDPOINTS.login, { email: email, password: password })
 }
 
