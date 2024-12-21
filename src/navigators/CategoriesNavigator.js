@@ -7,10 +7,10 @@ const Stack = createStackNavigator()
 const CategoriesNavigator = () => {
     return (
         <Stack.Navigator
-            initialRouteName="Categories"
+            initialRouteName="CategoriesScreen"
         >
             <Stack.Screen
-                name="Categories"
+                name="CategoriesScreen"
                 component={Categories}
                 options={{ headerShown: false }}
             />

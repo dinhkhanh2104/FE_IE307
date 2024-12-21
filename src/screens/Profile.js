@@ -39,7 +39,7 @@ const Profile = () => {
           </View>
         </View>
 
-        <View style={styles.titleText}>
+        {/* <View style={styles.titleText}>
           <Text style={styles.title}>Address Details</Text>
           <View style={{ gap: 10 }}>
             <Text>Address</Text>
@@ -57,9 +57,9 @@ const Profile = () => {
             <Text>Country</Text>
             <TextInput style={styles.textInputField} />
           </View>
-        </View>
+        </View> */}
 
-        <View style={[styles.titleText, { borderBottomWidth: 0 }]}>
+        {/* <View style={[styles.titleText, { borderBottomWidth: 0 }]}>
           <Text style={styles.title}>Bank Account Details</Text>
           <View style={{ gap: 10 }}>
             <Text>Bank Account Number</Text>
@@ -69,7 +69,9 @@ const Profile = () => {
             <Text>Name of Bank</Text>
             <TextInput style={styles.textInputField} />
           </View>
-        </View>
+        </View> */}
+
+        
 
 
         <View style={{ paddingHorizontal: "6%" }}>
