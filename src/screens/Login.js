@@ -15,7 +15,7 @@ import Fontisto from '@expo/vector-icons/Fontisto';
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { setToken } = useContext(AuthContext);
+  const { setToken, setRole } = useContext(AuthContext);
 
   const handleNavigateRegister = () => {
     navigation.navigate("Register");
@@ -40,11 +40,11 @@ const Login = ({ navigation }) => {
         text1: "Welcome back!",
         text2: "We’re glad to have you here 🤗",
       });
-      
+      setRole(response.data.user.role);
       await AsyncStorage.setItem('userToken', response.data.token); 
       setTimeout(() => {
         setToken(response.data.token);
-      }, 2000);
+      }, 1500);
     } catch (error) {
       console.log(error)
       setEmail('');
@@ -54,10 +54,6 @@ const Login = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-
-
-
-
       <View style={styles.header}>
         <Text style={styles.headerText}>Welcome</Text>
         <Text style={styles.headerText}>Back!</Text>

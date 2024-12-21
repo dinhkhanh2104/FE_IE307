@@ -7,10 +7,10 @@ const Stack = createStackNavigator()
 const WishlistNavigator = () => {
     return (
         <Stack.Navigator
-            initialRouteName="Wishlist"
+            initialRouteName="WishlistScreen"
         >
             <Stack.Screen
-                name="Wishlist"
+                name="WishlistScreen"
                 component={Wishlist}
                 options={{ headerShown: false }}
             />

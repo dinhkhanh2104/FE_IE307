@@ -40,7 +40,9 @@ const ProductDetail = ({ route, navigation }) => {
     const fetchRelatedProduct = async () => {
       try {
         const data = await getProductByCategory(product.category)
-        setRelatedProducts(data)
+        const randomData = [...data].sort(() => 0.5 - Math.random()).slice(0, 4);
+        setRelatedProducts(randomData)
+
       }
       catch (error) {
         console.error(error)
@@ -99,20 +101,27 @@ const ProductDetail = ({ route, navigation }) => {
     }
   };
 
-  console.log("product._id: ", product._id)
 
   const handleAddToWishlist = async (productId) => {
     try {
       const response = await addToWishlist(productId)
+      if (response.message === "Product already in wishlist") {
+        Toast.show({
+          type: 'info',
+          text1: "Sản phẩm đã có trong danh sách yêu thích",
+        });
+      }
+      else {
       Toast.show({
-        type: 'success',
-        text1: "Add to wishlist successfully",
-      });
-      await fetchWishlist()
+          type: 'success',
+          text1: "Thêm vào danh sách yêu thích thành công",
+        });
+        await fetchWishlist()
+      }
     }
     catch (error) {
-      console.error("Error", error);
-      Toast.show({ type: 'error', text1: "Add to wishlist failed. Please try again." });
+      console.error("Error from detail: ", error.response.status);
+      Toast.show({ type: 'error', text1: "Thêm vào danh sách yêu thích thất bại. Vui lòng thử lại." });
     }
   }
 
@@ -132,7 +141,7 @@ const ProductDetail = ({ route, navigation }) => {
   }
 
   const handleBuyNow = async (params) => {
-    console.log('asdfds', selectedItem)
+    // console.log('asdfds', selectedItem)
     const formattedData = [{
       quantity: 1,
       totalPrice: selectedPrice,
@@ -371,21 +380,23 @@ const ProductDetail = ({ route, navigation }) => {
           </View>
 
           {/* You Might Like */}
-          {/* <View style={styles.related}>
-          <Text style={styles.sectionTitle}>Đề xuất dành cho bạn</Text>
-          <FlatList
-            data={relatedProducts?.sort(() => 0.5 - Math.random()).slice(0, 4)}
-            horizontal
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.relatedItem}>
-                <Image source={item.images[0]} style={styles.relatedImage} />
-                <Text>{item.name}</Text>
-                <Text>{item.variations[0].price}</Text>
-              </View>
-            )}
-          />
-        </View> */}
+          <View style={styles.related}>
+            <Text style={styles.sectionTitle}>Đề xuất dành cho bạn</Text>
+            <FlatList
+              data={relatedProducts}
+              showsHorizontalScrollIndicator={false}
+              horizontal
+              renderItem={({ item }) => (
+                <View style={styles.relatedItem}>
+                  <Image source={{ uri: item.images[0] }} style={styles.relatedImage} />
+                  <Text style={{ paddingLeft: 6 }}>
+                    {item.name.length > 14 ? `${item.name.slice(0, 14)}...` : item.name}
+                  </Text>
+                  <Text style={{ color: COLORS.primary, fontWeight: '600', paddingLeft: 6 }}>{formatCurrency(item.variations[0].price)}</Text>
+                </View>
+              )}
+            />
+          </View>
 
         </ScrollView>
 
@@ -595,11 +606,18 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   relatedItem: {
-    marginRight: 16,
+    marginRight: 10,
+    width: 152,
+    borderWidth: 1,
+    borderRadius: 12,
+    borderColor: "gray",
+    paddingBottom: 10,
   },
   relatedImage: {
-    width: 100,
-    height: 100,
+    width: 150,
+    height: 150,
+    borderTopRightRadius: 12,
+    borderTopLeftRadius: 12,
     resizeMode: 'cover',
     marginBottom: 8,
   },
