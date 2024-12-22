@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, SafeAreaView } from 'react-native';
-import { Picker } from '@react-native-picker/picker'; //
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Alert,
+  SafeAreaView,
+} from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { COLORS } from '../../constants/theme';
 import { createProduct } from '../../services/axios/actions/ProductAction';
 import { getCategories } from '../../services/axios/actions/Categories';
@@ -11,6 +20,7 @@ const CreateProduct = () => {
 
   const navigation = useNavigation()
   const [product, setProduct] = useState({
+    spu: '',
     spu: '',
     name: '',
     description: '',
@@ -38,14 +48,75 @@ const CreateProduct = () => {
       try {
         const response = await getCategories()
         setCategories(response);
-      }
-      catch (error) {
-        console.log("Error: ", error)
+      } catch (error) {
+        console.error('Error fetching categories:', error);
       }
     };
 
     fetchCategories();
   }, []);
+
+  const handleInputChange = (key, value) => {
+    setProduct((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handleVariationChange = (index, key, value) => {
+    const updatedVariations = product.variations.map((variation, i) =>
+      i === index
+        ? {
+            ...variation,
+            [key]:
+              key === 'price' || key === 'stockQuantity'
+                ? value === '' || isNaN(value)
+                  ? 0
+                  : parseFloat(value)
+                : value,
+          }
+        : variation
+    );
+    setProduct((prev) => ({
+      ...prev,
+      variations: updatedVariations,
+    }));
+  };
+
+  const handleNestedChange = (key, variationIndex, itemIndex, field, value) => {
+    const updatedVariations = product.variations.map((variation, i) =>
+      i === variationIndex
+        ? {
+            ...variation,
+            [key]: variation[key].map((item, j) =>
+              j === itemIndex ? { ...item, [field]: value } : item
+            ),
+          }
+        : variation
+    );
+    setProduct((prev) => ({ ...prev, variations: updatedVariations }));
+  };
+
+  const handleImageChange = (variationIndex, imgIndex, value) => {
+    const updatedVariations = product.variations.map((variation, i) =>
+      i === variationIndex
+        ? {
+            ...variation,
+            images: variation.images.map((img, j) => (j === imgIndex ? value : img)),
+          }
+        : variation
+    );
+    setProduct((prev) => ({ ...prev, variations: updatedVariations }));
+  };
+
+  const handleAddImage = (variationIndex) => {
+    const updatedVariations = product.variations.map((variation, i) =>
+      i === variationIndex
+        ? { ...variation, images: [...variation.images, ''] }
+        : variation
+    );
+    setProduct((prev) => ({ ...prev, variations: updatedVariations }));
+  };
 
   const handleAddVariation = () => {
     setProduct((prev) => ({
@@ -56,13 +127,11 @@ const CreateProduct = () => {
           sku: '',
           price: 0,
           stockQuantity: 0,
-          images: ["no_thing"],
           attributes: [{ attributeName: '', values: [''] }],
         },
       ],
     }));
   };
-
 
   const handleInputChange = (key, value) => {
     setProduct((prev) => ({
@@ -72,27 +141,17 @@ const CreateProduct = () => {
   };
 
 
-  const handleVariationChange = (index, key, value, subIndex = null, subKey = null) => {
-    const updatedVariations = product.variations.map((variation, i) => {
-      if (i !== index) return variation;
-
-      if (subIndex !== null && subKey) {
-        return {
+  const handleVariationChange = (index, key, value) => {
+    const updatedVariations = product.variations.map((variation, i) =>
+      i === index
+        ? {
           ...variation,
-          [key]: variation[key].map((item, idx) =>
-            idx === subIndex ? { ...item, [subKey]: value } : item
-          ),
-        };
-      }
-
-      return {
-        ...variation,
-        [key]: (key === 'price' || key === 'stockQuantity') && value === ''
-          ? 0
-          : value,
-      };
-    });
-
+          [key]: (key === 'price' || key === 'stockQuantity') && value === ''
+            ? 0 // Đặt giá trị mặc định là 0 nếu trống
+            : value,
+        }
+        : variation
+    );
     setProduct((prev) => ({
       ...prev,
       variations: updatedVariations,
@@ -100,51 +159,29 @@ const CreateProduct = () => {
   };
 
 
-
   const handleSubmit = async () => {
-    const preparedProduct = {
-      ...product,
-      variations: product.variations.map((variation) => ({
-        ...variation,
-        price: parseFloat(variation.price) || 0,
-        stockQuantity: parseInt(variation.stockQuantity) || 0,
-      })),
-    };
+    // Alert.alert('Product Submitted', JSON.stringify(product, null, 2));
 
     try {
-      const response = await createProduct(preparedProduct);
-      Alert.alert('Thành công', 'Đã thêm sản phẩm thành công!');
-      navigation.goBack()
-      
-    } catch (error) {
-      console.error("Lỗi mẹ ồi: ", error);
-      Alert.alert('Thất bại', 'Yêu cầu không thể thực hiện!');
-
+      // const response = await createProduct(product)
+      const response = await createProduct(sample)
+      console.log("createProduct:", response);
     }
+    catch (error) {
+      console.error("Lỗi mẹ ồi: ", error)
+    }
+
+
   };
 
 
 
-
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.container}
-      >
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         <Text style={styles.title}>Thêm Sản Phẩm</Text>
 
         {/* Basic Fields */}
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Mã SPU:</Text>
-          <TextInput
-            style={styles.input}
-            value={product.spu}
-            onChangeText={(text) => handleInputChange('spu', text)}
-          />
-        </View>
-
         <View style={styles.field}>
           <Text style={styles.label}>Tên sản phẩm:</Text>
           <TextInput
@@ -154,6 +191,7 @@ const CreateProduct = () => {
           />
         </View>
 
+        {/* Description */}
         <View style={styles.field}>
           <Text style={styles.label}>Mô tả:</Text>
           <TextInput
@@ -163,23 +201,23 @@ const CreateProduct = () => {
           />
         </View>
 
+        {/* Category */}
         <View style={styles.field}>
           <Text style={styles.label}>Danh mục:</Text>
-          <View style={{ borderWidth: 1, borderColor: "#ccc", borderRadius: 6 }}>
+          <View style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 6 }}>
             <Picker
               selectedValue={product.category}
               onValueChange={(itemValue) => handleInputChange('category', itemValue)}
-            // style={styles.picker}
             >
               <Picker.Item label="Chọn danh mục" value="" />
               {categories.map((category, index) => (
                 <Picker.Item key={index} label={category.name} value={category._id} />
               ))}
             </Picker>
-
           </View>
         </View>
 
+        {/* Brand */}
         <View style={styles.field}>
           <Text style={styles.label}>Thương hiệu:</Text>
           <TextInput
@@ -189,18 +227,20 @@ const CreateProduct = () => {
           />
         </View>
 
+        {/* Rating */}
         <View style={styles.field}>
           <Text style={styles.label}>Đánh giá:</Text>
           <TextInput
             style={styles.input}
             keyboardType="numeric"
             value={product.rating.toString()}
-            onChangeText={(text) => handleInputChange('rating', text === '' ? '' : parseFloat(text))}
+            onChangeText={(text) => handleInputChange('rating', parseFloat(text))}
           />
         </View>
 
+        {/* Images */}
         <View style={styles.field}>
-          <Text style={styles.label}>Link ảnh:</Text>
+          <Text style={styles.label}>Link ảnh sản phẩm:</Text>
           <TextInput
             style={styles.input}
             value={product.images[0]}
@@ -217,6 +257,8 @@ const CreateProduct = () => {
         {product.variations.map((variation, index) => (
           <View key={index} style={styles.variation}>
             <Text style={styles.subtitle}>Biến thể {index + 1}</Text>
+
+            {/* SKU */}
             <View style={styles.field}>
               <Text style={styles.label}>Mã SKU:</Text>
               <TextInput
@@ -225,17 +267,19 @@ const CreateProduct = () => {
                 onChangeText={(text) => handleVariationChange(index, 'sku', text)}
               />
             </View>
+
+            {/* Giá */}
             <View style={styles.field}>
               <Text style={styles.label}>Giá:</Text>
               <TextInput
                 style={styles.input}
                 keyboardType="numeric"
                 value={variation.price.toString()}
-                onChangeText={(text) =>
-                  handleVariationChange(index, 'price', text === '' ? '' : parseFloat(text))
-                }
+                onChangeText={(text) => handleVariationChange(index, 'price', parseFloat(text))}
               />
             </View>
+
+            {/* Số lượng kho */}
             <View style={styles.field}>
               <Text style={styles.label}>Số lượng kho:</Text>
               <TextInput
@@ -243,42 +287,9 @@ const CreateProduct = () => {
                 keyboardType="numeric"
                 value={variation.stockQuantity.toString()}
                 onChangeText={(text) =>
-                  handleVariationChange(index, 'stockQuantity', text === '' ? '' : parseInt(text))
+                  handleVariationChange(index, 'stockQuantity', parseInt(text))
                 }
               />
-            </View>
-            <View style={styles.field}>
-              <Text style={styles.label}>Link ảnh:</Text>
-              <TextInput
-                style={styles.input}
-                value={variation.images[0]}
-                onChangeText={(text) =>
-                  handleVariationChange(index, 'images', [text])
-                }
-              />
-            </View>
-            <View style={styles.field}>
-              <Text style={styles.label}>Thuộc tính :</Text>
-              {variation.attributes.map((attribute, attrIndex) => (
-                <View key={attrIndex}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Tên thuộc tính"
-                    value={attribute.attributeName}
-                    onChangeText={(text) =>
-                      handleVariationChange(index, 'attributes', "Màu sắc", attrIndex, 'attributeName')
-                    }
-                  />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Giá trị thuộc tính"
-                    value={attribute.values[0]}
-                    onChangeText={(text) =>
-                      handleVariationChange(index, 'attributes', [text], attrIndex, 'values')
-                    }
-                  />
-                </View>
-              ))}
             </View>
           </View>
         ))}
@@ -322,10 +333,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
   },
-  picker: {
-    borderWidth: 10,
-    borderColor: "red"
-  },
   variation: {
     marginBottom: 20,
     padding: 10,
@@ -349,7 +356,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   addButton: {
-    backgroundColor: "grey",
+    backgroundColor: 'grey',
   },
   submitButton: {
     backgroundColor: COLORS.primary,

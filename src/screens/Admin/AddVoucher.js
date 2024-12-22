@@ -42,7 +42,7 @@ const AddVoucherScreen = ({ navigation }) => {
     const voucherData = {
       code,
       description,
-      discountAmount:parseInt(discountAmount),
+      discountAmount: parseInt(discountAmount),
       discountType: "percentage", 
       startDate,
       endDate,
@@ -50,38 +50,41 @@ const AddVoucherScreen = ({ navigation }) => {
       isActive,
       usageLimit: parseInt(usageLimit),
     };
-
+  
     try {
+      const token = await AsyncStorage.getItem('userToken'); // Lấy token từ AsyncStorage
+  
       const response = await fetch("https://ie-307-6017b574900a.herokuapp.com/discount/create", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Thêm tiêu đề xác thực
+        },
         body: JSON.stringify(voucherData),
       });
-
-      console.log(
-       JSON.stringify(voucherData),
-      )
-      
-      console.log(await response.json())
-
-
+  
+      const result = await response.json(); // Chuyển đổi kết quả sang JSON
+  
       if (response.status === 201) {
         Toast.show({
           type: "success",
-          text1: "Voucher created successfully!",
+          text1: "Tạo voucher thành công!",
         });
-        navigation.goBack(); // Navigate back after successful creation
+        navigation.goBack(); // Quay lại màn hình trước
       } else {
-        throw new Error("Failed to create voucher.");
+        throw new Error(result.message || "Không thể tạo voucher");
       }
     } catch (error) {
-        
       console.error("Error creating voucher:", error);
       Toast.show({
         type: "error",
-        text1: "Failed to create voucher.",
+        text1: "Lỗi",
+        text2: error.message || "Không thể tạo voucher.",
       });
     }
   };
+
+  
 
   return (
     <View style={styles.container}>
