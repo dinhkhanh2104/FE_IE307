@@ -1,16 +1,19 @@
 import { NavigationContainer } from "@react-navigation/native";
-import { useContext } from "react"
-
 import AuthStack from "./AuthStack";
-import AuthContext from "../contexts/AuthContext"
+import { useContext } from "react";
 import BottomTabs from "./BottomTabs"
+import AuthContext from "../contexts/AuthContext";
+import AdminNavigator from "./AdminNavigator";
 
 export default function Navigators() {
-    const { token } = useContext(AuthContext)
-    // console.log(token);
-    return (
-        <NavigationContainer>
-            {token ? <BottomTabs /> : <AuthStack />}
-        </NavigationContainer>
-    )
+
+    const { token, role } = useContext(AuthContext)
+
+return (
+    <NavigationContainer>
+        {/* <AdminNavigator /> */}
+        {token ? ( role === "admin" ? <AdminNavigator /> : <BottomTabs />) : <AuthStack />}
+        {/* {token ? (  <BottomTabs />) : <AuthStack />} */}
+    </NavigationContainer>
+)
 }

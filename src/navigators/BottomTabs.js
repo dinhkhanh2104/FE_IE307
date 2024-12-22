@@ -1,18 +1,22 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { FontAwesome, AntDesign } from "@expo/vector-icons";
-import Ionicons from '@expo/vector-icons/Ionicons';
-
-import ProductDetail from "../screens/ProductDetail";
 import HomeNavigator from "./HomeNavigator"
-import Wishlist from "../screens/Wishlist";
-import Cart from "../screens/Cart";
 import Profile from "../screens/Profile";
 import { Icon } from "react-native-elements";
 import { COLORS, SIZES } from "../constants/theme";
+import WishlistNavigator from "./WishlistNavigator";
+import CategoriesNavigator from "./CategoriesNavigator";
+import Feather from '@expo/vector-icons/Feather';
+
+import { useContext } from "react";
+import  AuthContext  from "../contexts/AuthContext";
+import ProfileNavigator from "./ProfileNavigator";
+
+
 
 const Tab = createBottomTabNavigator()
 
 export default function BottomTabs() {
+    
     return (
         <Tab.Navigator
             initialRouteName="Home"
@@ -41,31 +45,30 @@ export default function BottomTabs() {
             />
             <Tab.Screen
                 name="Wishlist"
-                component={Wishlist}
+                component={WishlistNavigator}
                 options={{
                     tabBarIcon: ({ focused }) => {
                         return <Icon name="heart" type="octicon" size={24} color={focused ? COLORS.primary : COLORS.black}/>
                     },
-                    headerShown: false
+                    headerShown: false,
+                  
                 }}
             />
 
             <Tab.Screen
-                name="Cart"
-                component={Cart}
+                name="Categories"
+                component={CategoriesNavigator}
                 options={{
                     tabBarIcon: ({ focused }) => {
-                        return <Icon name="shopping-cart" type="feather" size={24} color={focused ? COLORS.primary : COLORS.black} />
+                        return <Feather name="grid" size={24} color={focused ? COLORS.primary : COLORS.black} /> 
                     },
-                    tabBarBadge: 3,
                     headerShown: false
                     
                 }}
             />
                 <Tab.Screen
-                    name="ProductDetail"
-                    // component={Profile}
-                    component={ProductDetail}
+                    name="Profile"
+                    component={ProfileNavigator}
                     options={{
                         tabBarIcon: ({ focused }) => {
                             return <Icon name="user" type="feather" size={24} color={focused ? COLORS.primary : COLORS.black}/>
