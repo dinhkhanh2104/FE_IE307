@@ -13,7 +13,8 @@ export const API_ENDPOINTS = {
     wishlish: "/wishlist",
     addToWishlist: "/wishlist/add-to-wishlist/",
     deleteWishlist: "/wishlist/remove-from-wishlist/",
-    userOrder:"/orders/user-order"
+    userOrder:"/orders/user-order",
+    allOrder:"/orders",
 
     // userCart: "/carts/",
 }
