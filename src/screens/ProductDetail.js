@@ -100,7 +100,6 @@ const ProductDetail = ({ route, navigation }) => {
     }
   };
 
-
   const handleAddToWishlist = async (productId) => {
     try {
       const response = await addToWishlist(productId)

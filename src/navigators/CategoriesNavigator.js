@@ -1,7 +1,7 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import Categories from "../screens/Categories";
 import ProductDetail from "../screens/ProductDetail";
-import Checkout from "../screens/Checkout";
+import Checkout from "../screens/CheckOut";
 const Stack = createStackNavigator()
 
 const CategoriesNavigator = () => {

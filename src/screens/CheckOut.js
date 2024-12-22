@@ -14,12 +14,10 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import VoucherModal from '../components/VoucherModal';
-import ShippingAddressModal from '../components/ShippingAddressModal';
 import { useNavigation } from '@react-navigation/native';
 import AuthContext from '../contexts/AuthContext';
 import formatCurrency from '../../utils/formatCurrency';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getCart } from '../services/axios/actions/CartAction';
 import { WebView } from 'react-native-webview';
 
 const Checkout = ({ route }) => {
@@ -31,7 +29,7 @@ const Checkout = ({ route }) => {
   const [paymentMethod, setPaymentMethod] = useState('cod'); // Thêm trạng thái phương thức thanh toán
   const { address, fetchCart } = useContext(AuthContext);
   const { selectedCartItems } = route.params;
-  // console.log("Checkout: ", selectedCartItems)
+
 
   const [isPayPalVisible, setPayPalVisible] = useState(true);
   const [orderID, setOrderID] = useState(null);
@@ -138,7 +136,7 @@ const Checkout = ({ route }) => {
         Alert.alert('Lỗi', 'Không thể tạo đơn hàng PayPal');
       }
 
-      // console.log(data.id)
+
 
     } catch (error) {
       console.error('Error creating PayPal order:', error);
@@ -156,6 +154,8 @@ const Checkout = ({ route }) => {
       return;
     }
 
+    setIsLoading(true)
+
     if (paymentMethod === 'cod') {
       // Xử lý thanh toán COD
       const orderData = {
@@ -167,7 +167,9 @@ const Checkout = ({ route }) => {
           totalPrice: item.price * item.quantity,
         })),
         shippingAddress: {
-          detailAddress: `${shippingAddress.addressLine}, ${shippingAddress.ward}, ${shippingAddress.city}, ${shippingAddress.country}`,
+            province:shippingAddress.city,
+            ward:shippingAddress.ward,
+            addressDetail:`${shippingAddress.addressLine}, ${shippingAddress.ward}, ${shippingAddress.city}, ${shippingAddress.country}`
         },
         paymentMethod: 'cod', // Sử dụng phương thức đã chọn
       };
@@ -187,8 +189,8 @@ const Checkout = ({ route }) => {
         const result = await response.json();
 
         await fetchCart();
+        setIsLoading(false)
 
-        // console.log(result);
 
         if (response.ok) {
           Alert.alert('Đặt hàng thành công', 'Đơn hàng của bạn đã được đặt!');
@@ -236,8 +238,6 @@ const Checkout = ({ route }) => {
         const result = await response.json();
 
         await fetchCart();
-
-        console.log(result);
 
         if (response.ok) {
           Alert.alert('Đặt hàng thành công', 'Đơn hàng của bạn đã được đặt!');
