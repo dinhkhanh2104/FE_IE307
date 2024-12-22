@@ -108,7 +108,7 @@ const Cart = ({ navigation }) => {
   const handleNavigateCheckOut = () => {
     const selectedCartItems = cartItems.filter(item => selectedItems.has(item.variation.sku));
     navigation.navigate('Checkout', { selectedCartItems });
-    console.log(selectedCartItems)
+    // console.log(selectedCartItems)
   };
 
   return (
@@ -166,14 +166,14 @@ const Cart = ({ navigation }) => {
                           onPress={() => decrementQuantity(item.productId, item.variation.sku)}
                           style={styles.controlButtonContainer}
                         >
-                          <AntDesign name="minuscircle" size={24} color={"#f8375891"} />
+                          <AntDesign name="minuscircle" size={24} color={"#333"} />
                         </TouchableOpacity>
                         <Text style={styles.quantity}>{item.quantity}</Text>
                         <TouchableOpacity
                           onPress={() => incrementQuantity(item.productId, item.variation.sku)}
                           style={styles.controlButtonContainer}
                         >
-                          <AntDesign name="pluscircle" size={24} color={"#f8375891"} />
+                          <AntDesign name="pluscircle" size={24} color={"#333"} />
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
   quantity: {
     fontSize: 13,
     fontWeight: '500',
-    backgroundColor: '#f8375891',
+    backgroundColor: '#333',
     lineHeight: 32,
     width: 37,
     textAlign: 'center',

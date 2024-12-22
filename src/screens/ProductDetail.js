@@ -97,7 +97,6 @@ const ProductDetail = ({ route, navigation }) => {
       setSelectedPrice(variation.price);
       setActiveImageIndex(0);
       setSelectedItem(variation)
-      // console.log(selectedItem)
     }
   };
 
@@ -111,11 +110,14 @@ const ProductDetail = ({ route, navigation }) => {
         });
       }
       else {
-      Toast.show({
+        Toast.show({
           type: 'success',
           text1: "Thêm vào danh sách yêu thích thành công",
         });
         await fetchWishlist()
+        console.log("hihi");
+        
+
       }
     }
     catch (error) {
@@ -140,7 +142,6 @@ const ProductDetail = ({ route, navigation }) => {
   }
 
   const handleBuyNow = async (params) => {
-    // console.log('asdfds', selectedItem)
     const formattedData = [{
       quantity: 1,
       totalPrice: selectedPrice,
@@ -210,10 +211,10 @@ const ProductDetail = ({ route, navigation }) => {
                 <Icon name='share-a' type='fontisto' size={14} color={"#B5A2A2"} />
               </View>
             </View>
-            <Text style={styles.title}>{product?.name}</Text>
+            <Text style={styles.title}>{product.name}</Text>
             <Text style={styles.description}>{product?.description}</Text>
           </View>
-          ?
+
           {/* Phần màu sắc (variations) */}
           <View style={styles.variations}>
             <Text style={styles.sectionTitle}>Màu sắc</Text>

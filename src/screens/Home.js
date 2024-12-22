@@ -13,6 +13,7 @@ import Spinner from 'react-native-loading-spinner-overlay'
 import { useContext } from "react";
 import AuthContext from "../contexts/AuthContext";
 import Loading from '../components/Loading'
+import CountDown from '../components/CountDown'
 
 
 
@@ -52,28 +53,7 @@ const Home = ({ navigation }) => {
 
 
 
-  const initialTime = 22 * 60 * 60 + 55 * 60 + 20;
-
-  const [timeRemaining, setTimeRemaining] = useState(initialTime);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeRemaining((prevTime) => {
-        if (prevTime <= 0) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const hours = Math.floor(timeRemaining / 3600);
-  const minutes = Math.floor((timeRemaining % 3600) / 60);
-  const seconds = timeRemaining % 60;
-
+ 
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -138,29 +118,7 @@ const Home = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
-          <View style={styles.titleArea}>
-
-
-
-            {/* <View style={{ flexDirection: "row", gap: 16 }}>
-     <TouchableOpacity style={styles.button}>
-       <Text style={styles.buttonText}>Sort</Text>
-       <Image
-         source={require("../../assets/images/sort.png")}
-         style={{ width: 18, height: 18 }}
-       />
-     </TouchableOpacity>
-
-     <TouchableOpacity style={styles.button}>
-       <Text style={styles.buttonText}>Filter</Text>
-       <Icon name='filter' type='feather' size={18} />
-     </TouchableOpacity>
-   </View> */}
-
-          </View>
-
-
-
+      
           <View style={styles.carouselContainer}>
             <FlatList
               ref={flatListRef}
@@ -187,22 +145,7 @@ const Home = ({ navigation }) => {
             </View>
           </View>
 
-          <View style={styles.dealArea}>
-            <View style={styles.dealWrapper}>
-              <Text style={styles.dealText}>Deal of the day</Text>
-              <View style={styles.dealTime}>
-                <Icon name='alarm' type='MaterialCommunityIcons' size={24} color={COLORS.white} />
-                <Text style={{ color: COLORS.white }}>
-                  {`${hours}h ${minutes}m ${seconds}s remaining`}
-                </Text>
-              </View>
-            </View>
-
-            <TouchableOpacity style={styles.dealButton} onPress={() => { navigation.navigate("SaleNavigator") }}>
-              <Text style={styles.dealTextButton}>View all </Text>
-              <Icon name='arrowright' type='antdesign' color={COLORS.white} />
-            </TouchableOpacity>
-          </View>
+          <CountDown isButton={true} />
 
           <FlatList
             data={products.slice(0, Math.ceil(products.length / 2 + 1))}
@@ -380,7 +323,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   carouselContainer: {
-    marginTop: 20,
+    marginVertical: 20,
     alignItems: 'center',
   },
   carouselImage: {

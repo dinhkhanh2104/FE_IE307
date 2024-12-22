@@ -30,6 +30,7 @@ const Checkout = ({ route }) => {
   const { address, fetchCart } = useContext(AuthContext);
   const { selectedCartItems } = route.params;
 
+
   const [isPayPalVisible, setPayPalVisible] = useState(true);
   const [orderID, setOrderID] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -136,6 +137,7 @@ const Checkout = ({ route }) => {
       }
 
 
+
     } catch (error) {
       console.error('Error creating PayPal order:', error);
       Alert.alert('Lỗi', 'Đã xảy ra lỗi khi tạo đơn hàng PayPal');
@@ -187,14 +189,14 @@ const Checkout = ({ route }) => {
         const result = await response.json();
 
         await fetchCart();
-
         setIsLoading(false)
+
 
         if (response.ok) {
           Alert.alert('Đặt hàng thành công', 'Đơn hàng của bạn đã được đặt!');
           navigation.navigate("HomeScreen");
         } else {
-          console.log('Lỗi đặt hàng', result.error || 'Đã xảy ra lỗi khi đặt hàng');
+          // console.log('Lỗi đặt hàng', result.error || 'Đã xảy ra lỗi khi đặt hàng');
         }
       } catch (error) {
         console.error('Error creating order:', error);
@@ -241,7 +243,7 @@ const Checkout = ({ route }) => {
           Alert.alert('Đặt hàng thành công', 'Đơn hàng của bạn đã được đặt!');
           navigation.navigate("HomeScreen");
         } else {
-          console.log('Lỗi đặt hàng', result.error || 'Đã xảy ra lỗi khi đặt hàng');
+          // console.log('Lỗi đặt hàng', result.error || 'Đã xảy ra lỗi khi đặt hàng');
         }
       } catch (error) {
         console.error('Error creating order:', error);
@@ -251,11 +253,11 @@ const Checkout = ({ route }) => {
   const handleNavigationStateChange = async (navState) => {
     const { url } = navState;
 
-    console.log(url)
+    // console.log(url)
   
     if (url.includes('token')) {
       const token = url.match(/token=([^&]+)/)[1]; // Lấy token từ URL
-      console.log('PayPal Token:', token);
+      // console.log('PayPal Token:', token);
   
       // Gọi API capture order
       const captureUrl = `https://ie-307-6017b574900a.herokuapp.com/paypal/capture-order/${token}`;
@@ -268,7 +270,7 @@ const Checkout = ({ route }) => {
         });
   
         const data = await response.json();
-        console.log('Capture Order Response:', data);
+        // console.log('Capture Order Response:', data);
   
         if (data.status === 'COMPLETED') {
           await handleSaveOrder()
