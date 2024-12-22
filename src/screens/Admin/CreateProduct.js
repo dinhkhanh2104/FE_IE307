@@ -14,7 +14,7 @@ import { COLORS } from '../../constants/theme';
 import { createProduct } from '../../services/axios/actions/ProductAction';
 import { getCategories } from '../../services/axios/actions/Categories';
 import { useNavigation } from '@react-navigation/native';
-import { goBack } from 'expo-router/build/global-state/routing';
+
 
 const CreateProduct = () => {
 
@@ -56,67 +56,7 @@ const CreateProduct = () => {
     fetchCategories();
   }, []);
 
-  const handleInputChange = (key, value) => {
-    setProduct((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
-  const handleVariationChange = (index, key, value) => {
-    const updatedVariations = product.variations.map((variation, i) =>
-      i === index
-        ? {
-            ...variation,
-            [key]:
-              key === 'price' || key === 'stockQuantity'
-                ? value === '' || isNaN(value)
-                  ? 0
-                  : parseFloat(value)
-                : value,
-          }
-        : variation
-    );
-    setProduct((prev) => ({
-      ...prev,
-      variations: updatedVariations,
-    }));
-  };
-
-  const handleNestedChange = (key, variationIndex, itemIndex, field, value) => {
-    const updatedVariations = product.variations.map((variation, i) =>
-      i === variationIndex
-        ? {
-            ...variation,
-            [key]: variation[key].map((item, j) =>
-              j === itemIndex ? { ...item, [field]: value } : item
-            ),
-          }
-        : variation
-    );
-    setProduct((prev) => ({ ...prev, variations: updatedVariations }));
-  };
-
-  const handleImageChange = (variationIndex, imgIndex, value) => {
-    const updatedVariations = product.variations.map((variation, i) =>
-      i === variationIndex
-        ? {
-            ...variation,
-            images: variation.images.map((img, j) => (j === imgIndex ? value : img)),
-          }
-        : variation
-    );
-    setProduct((prev) => ({ ...prev, variations: updatedVariations }));
-  };
-
-  const handleAddImage = (variationIndex) => {
-    const updatedVariations = product.variations.map((variation, i) =>
-      i === variationIndex
-        ? { ...variation, images: [...variation.images, ''] }
-        : variation
-    );
-    setProduct((prev) => ({ ...prev, variations: updatedVariations }));
-  };
+ 
 
   const handleAddVariation = () => {
     setProduct((prev) => ({
@@ -163,7 +103,6 @@ const CreateProduct = () => {
     // Alert.alert('Product Submitted', JSON.stringify(product, null, 2));
 
     try {
-      // const response = await createProduct(product)
       const response = await createProduct(sample)
       console.log("createProduct:", response);
     }
