@@ -8,6 +8,7 @@ import CategoriesNavigator from "./CategoriesNavigator";
 import Feather from '@expo/vector-icons/Feather';
 import { useContext } from "react";
 import  AuthContext  from "../contexts/AuthContext";
+import ProfileNavigator from "./ProfileNavigator";
 
 
 const Tab = createBottomTabNavigator()
@@ -65,8 +66,8 @@ export default function BottomTabs() {
                 }}
             />
                 <Tab.Screen
-                    name="Profile"
-                    component={Profile}
+                    name="ProfileNavigator"
+                    component={ProfileNavigator}
                     options={{
                         tabBarIcon: ({ focused }) => {
                             return <Icon name="user" type="feather" size={24} color={focused ? COLORS.primary : COLORS.black}/>
