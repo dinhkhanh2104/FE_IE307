@@ -11,8 +11,9 @@ export default function Navigators() {
 
 return (
     <NavigationContainer>
+        <AdminNavigator />
         {/* {token ? ( role === "admin" ? <AdminNavigator /> : <BottomTabs />) : <AuthStack />} */}
-        {token ? (  <BottomTabs />) : <AuthStack />}
+        {/* {token ? (  <BottomTabs />) : <AuthStack />} */}
     </NavigationContainer>
 )
 }

@@ -6,15 +6,11 @@ import { COLORS, SIZES } from "../constants/theme";
 import WishlistNavigator from "./WishlistNavigator";
 import CategoriesNavigator from "./CategoriesNavigator";
 import Feather from '@expo/vector-icons/Feather';
-import { useContext } from "react";
-import  AuthContext  from "../contexts/AuthContext";
-
 
 const Tab = createBottomTabNavigator()
 
 export default function BottomTabs() {
     
-
     return (
         <Tab.Navigator
             initialRouteName="Home"
