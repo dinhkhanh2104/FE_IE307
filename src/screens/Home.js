@@ -9,7 +9,6 @@ import { COLORS, SIZES } from '../constants/theme'
 import { carousel as carouselData } from '../../data/carousel'
 import Card from '../components/Card'
 import { getProducts } from '../services/axios/actions/ProductAction'
-import Spinner from 'react-native-loading-spinner-overlay'
 import { useContext } from "react";
 import AuthContext from "../contexts/AuthContext";
 import Loading from '../components/Loading'

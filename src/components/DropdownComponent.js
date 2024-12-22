@@ -3,15 +3,9 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
-const data = [
-  { label: 'Today', value: '1' },
-  { label: 'Weekly', value: '2' },
-  { label: 'Monthly', value: '3' },
-];
 
-const DropdownComponent = () => {
-  const [value, setValue] = useState('1');
 
+const DropdownComponent = ({ isIcon = true, data, setLabel }) => {
   return (
     <View style={styles.container}>
       <Dropdown
@@ -21,20 +15,20 @@ const DropdownComponent = () => {
         data={data}
         maxHeight={300}
         labelField="label"
-        valueField="value"
-        value={value}
         onChange={item => {
-          setValue(item.value);
+          setLabel(item?.label);
         }}
         renderLeftIcon={() => (
-          <View style = {{marginRight: 10}}>
-            <AntDesign
-              style={styles.icon}
-              color='black'
-              name="calendar"
-              size={20}
-            />
-          </View>
+          isIcon && (
+            <View style={{ marginRight: 10 }}>
+              <AntDesign
+                style={styles.icon}
+                color='black'
+                name="calendar"
+                size={20}
+              />
+            </View>
+          )
 
 
         )}
