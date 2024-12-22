@@ -9,8 +9,8 @@ const ProfileScreen = ({ navigation }) => {
   const [user, setUser] = useState(null);
   const [discounts, setDiscounts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isVoucherModalVisible, setVoucherModalVisible] = useState(false); 
-  const { logout } = useContext(AuthContext); 
+  const [isVoucherModalVisible, setVoucherModalVisible] = useState(false);
+  const { logout } = useContext(AuthContext);
 
   // Lấy mã giảm giá từ server
   const fetchDiscounts = async () => {
@@ -75,7 +75,7 @@ const ProfileScreen = ({ navigation }) => {
       </View>
     );
   }
-  
+
   // Hàm xử lý đăng xuất
   const handleLogout = () => {
     Alert.alert(
@@ -83,14 +83,14 @@ const ProfileScreen = ({ navigation }) => {
       "Bạn có chắc chắn muốn đăng xuất?",
       [
         { text: "Hủy", style: "cancel" },
-        { text: "Đồng ý", onPress: () => logout() }
+        { text: "Đồng ý", onPress: logout }
       ]
     );
   };
 
   // Hàm xử lý khi áp dụng mã giảm giá
   const applyVoucher = () => {
-    navigation.navigate("Home"); 
+    navigation.navigate("Home");
     setVoucherModalVisible(false);
   };
 
@@ -117,14 +117,14 @@ const ProfileScreen = ({ navigation }) => {
 
       {/* Profile Options */}
       <View style={styles.options}>
-        <OptionItem title="Đơn hàng" description="Xem tình trạng đơn hàng" onPress={() => navigation.navigate("MyOrdersScreen")}/>
-        <OptionItem title="Địa chỉ giao hàng" description="Thay đổi và cập nhật địa chỉ giao hàng" onPress={() => navigation.navigate("AddressSelection")}/>
-        <OptionItem 
-          title="Mã giảm giá" 
-          description="Xem các mã giảm giá đang có" 
+        <OptionItem title="Đơn hàng" description="Xem tình trạng đơn hàng" onPress={() => navigation.navigate("MyOrdersScreen")} />
+        <OptionItem title="Địa chỉ giao hàng" description="Thay đổi và cập nhật địa chỉ giao hàng" onPress={() => navigation.navigate("AddressSelection")} />
+        <OptionItem
+          title="Mã giảm giá"
+          description="Xem các mã giảm giá đang có"
           onPress={() => setVoucherModalVisible(true)} // Mở modal khi nhấn vào "Mã giảm giá"
         />
-        <OptionItem title="Cài đặt" description="Thông tin tài khoản, password" onPress={() => navigation.navigate("ChangeProfileScreen",{
+        <OptionItem title="Cài đặt" description="Thông tin tài khoản, password" onPress={() => navigation.navigate("ChangeProfileScreen", {
           userId: user._id,    // Truyền userId
           username: user.username,  // Truyền username
           email: user.email,  // Truyền email

@@ -21,7 +21,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 const Cart = ({ navigation }) => {
-  const { cart, setCart } = useContext(AuthContext); // Access cart from context and setCart to update it
+  const { cart, setCart, fetchCart } = useContext(AuthContext); // Access cart from context and setCart to update it
   const [cartItems, setCartItems] = useState(cart); // Local state to manage UI
   const [selectedItems, setSelectedItems] = useState(new Set()); // Track selected items
 

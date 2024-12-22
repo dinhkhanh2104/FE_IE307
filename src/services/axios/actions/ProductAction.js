@@ -64,37 +64,40 @@ export const searchProducts = async (searchText) => {
 }
 
 export const createProduct = async (product) => {
+
     try {
         const token = await AsyncStorage.getItem('userToken');
         if (!token) {
             throw new Error('User token is not available');
         }
 
-        const response = await fetch('https://ie-307-6017b574900a.herokuapp.com/product/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-                body: JSON.stringify(product)
-            },
+        const response = await axiosInstance.post(API_ENDPOINTS.createProduct, (product))
 
-        });
+        console.log(JSON.stringify(product));
+        console.log("data: ", response.data);
 
-        console.log(JSON.stringify(product))
-
-
-        console.log(await response.json())
-        // if (response.status === 201) {
-        const data = await response.json();
-        console.log(data)
-        return data.data
-        // }
-        // else {
-        //     throw new Error("Fail to fetch cart")
-        // }
+        return response.data.data;
+    } catch (error) {
+        console.error("Error fetching product data: ", error);
+        throw error;
     }
-    catch (error) {
-        // console.error("Error fetching cart", error);
-        throw error
+
+}
+
+export const updateProduct = async (product) => {
+    try {
+        const token = await AsyncStorage.getItem('userToken');
+        if (!token) {
+            throw new Error('User token is not available');
+        }
+        const response = await axiosInstance.post(`https://ie-307-6017b574900a.herokuapp.com/product/${product._id}/update`, product);
+
+        console.log(JSON.stringify(product));
+        console.log("data: ", response.data);
+
+        return response.data.data;
+    } catch (error) {
+        console.error("Error fetching product data: ", error);
+        throw error;
     }
 }

@@ -1,22 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  Alert,
-  SafeAreaView,
-} from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, SafeAreaView } from 'react-native';
+import { Picker } from '@react-native-picker/picker'; //
 import { COLORS } from '../../constants/theme';
 import { createProduct } from '../../services/axios/actions/ProductAction';
 import { getCategories } from '../../services/axios/actions/Categories';
 import { useNavigation } from '@react-navigation/native';
-
+import { goBack } from 'expo-router/build/global-state/routing';
 
 const CreateProduct = () => {
+
+  const navigation = useNavigation()
   const [product, setProduct] = useState({
     spu: '',
     name: '',
@@ -30,117 +23,29 @@ const CreateProduct = () => {
         sku: '',
         price: 0,
         stockQuantity: 0,
-        images: ["no_thing"],
+        images: [""],
         attributes: [{ attributeName: '', values: [''] }],
-        features: [{ featureName: '', description: '' }],
-        specifications: [{ specName: '', specValue: '' }],
       },
     ],
   });
 
-  const sample = {
-    spu: "CLO-001@",
-    name: "Áo sơ mi nam CoolWear",
-    description: "Áo sơ mi nam CoolWear với chất liệu cotton cao cấp, kiểu dáng hiện đại, phù hợp cho mọi dịp.",
-    category: "67591ec2661c9d22b4bdeaa4",
-    brand: "CoolWear",
-    rating: 4.7,
-    images: ["https://example.com/images/ao-so-mi.jpg"],
-    variations: [
-      {
-        sku: "CLO-001@-BLACK-M",
-        attributes: [
-          {
-            attributeName: "Màu sắc",
-            values: ["Đen"]
-          },
-          {
-            attributeName: "Kích thước",
-            values: ["M"]
-          }
-        ],
-        price: 450000,
-        stockQuantity: 100,
-        images: ["https://example.com/images/ao-so-mi-black-m.jpg"],
-        features: [
-          {
-            featureName: "Chất liệu",
-            description: "Chất liệu cotton 100%, thoáng mát, mềm mại."
-          },
-          {
-            featureName: "Kiểu dáng",
-            description: "Kiểu dáng ôm vừa vặn, phù hợp với phong cách trẻ trung."
-          }
-        ],
-        specifications: [
-          {
-            specName: "Màu sắc",
-            specValue: "Đen"
-          },
-          {
-            specName: "Chất liệu",
-            specValue: "Cotton"
-          }
-        ]
-      },
-      {
-        sku: "CLO-001@-WHITE-L",
-        attributes: [
-          {
-            attributeName: "Màu sắc",
-            values: ["Trắng"]
-          },
-          {
-            attributeName: "Kích thước",
-            values: ["L"]
-          }
-        ],
-        price: 460000,
-        stockQuantity: 80,
-        images: ["https://example.com/images/ao-so-mi-white-l.jpg"],
-        features: [
-          {
-            featureName: "Chất liệu",
-            description: "Chất liệu cotton 100%, thoáng mát, mềm mại."
-          },
-          {
-            featureName: "Kiểu dáng",
-            description: "Kiểu dáng ôm vừa vặn, phù hợp với phong cách trẻ trung."
-          }
-        ],
-        specifications: [
-          {
-            specName: "Màu sắc",
-            specValue: "Trắng"
-          },
-          {
-            specName: "Chất liệu",
-            specValue: "Cotton"
-          }
-        ]
-      }
-    ]
-  };
-
-
+  
   const [categories, setCategories] = useState([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  // const [selectedCategoryId, setSelectedCategoryId] = useState('');
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await getCategories()
-        // console.log(response)
         setCategories(response);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
+      }
+      catch (error) {
+        console.log("Error: ", error)
       }
     };
 
     fetchCategories();
   }, []);
-
- 
 
   const handleAddVariation = () => {
     setProduct((prev) => ({
@@ -151,13 +56,13 @@ const CreateProduct = () => {
           sku: '',
           price: 0,
           stockQuantity: 0,
+          images: ["no_thing"],
           attributes: [{ attributeName: '', values: [''] }],
-          features: [{ featureName: '', description: '' }],
-          specifications: [{ specName: '', specValue: '' }],
         },
       ],
     }));
   };
+
 
   const handleInputChange = (key, value) => {
     setProduct((prev) => ({
@@ -167,17 +72,27 @@ const CreateProduct = () => {
   };
 
 
-  const handleVariationChange = (index, key, value) => {
-    const updatedVariations = product.variations.map((variation, i) =>
-      i === index
-        ? {
+  const handleVariationChange = (index, key, value, subIndex = null, subKey = null) => {
+    const updatedVariations = product.variations.map((variation, i) => {
+      if (i !== index) return variation;
+
+      if (subIndex !== null && subKey) {
+        return {
           ...variation,
-          [key]: (key === 'price' || key === 'stockQuantity') && value === ''
-            ? 0 // Đặt giá trị mặc định là 0 nếu trống
-            : value,
-        }
-        : variation
-    );
+          [key]: variation[key].map((item, idx) =>
+            idx === subIndex ? { ...item, [subKey]: value } : item
+          ),
+        };
+      }
+
+      return {
+        ...variation,
+        [key]: (key === 'price' || key === 'stockQuantity') && value === ''
+          ? 0
+          : value,
+      };
+    });
+
     setProduct((prev) => ({
       ...prev,
       variations: updatedVariations,
@@ -185,8 +100,16 @@ const CreateProduct = () => {
   };
 
 
+
   const handleSubmit = async () => {
-    // Alert.alert('Product Submitted', JSON.stringify(product, null, 2));
+    const preparedProduct = {
+      ...product,
+      variations: product.variations.map((variation) => ({
+        ...variation,
+        price: parseFloat(variation.price) || 0,
+        stockQuantity: parseInt(variation.stockQuantity) || 0,
+      })),
+    };
 
     try {
       const response = await createProduct(preparedProduct);
@@ -204,11 +127,24 @@ const CreateProduct = () => {
 
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.container}
+      >
         <Text style={styles.title}>Thêm Sản Phẩm</Text>
 
         {/* Basic Fields */}
+
+        <View style={styles.field}>
+          <Text style={styles.label}>Mã SPU:</Text>
+          <TextInput
+            style={styles.input}
+            value={product.spu}
+            onChangeText={(text) => handleInputChange('spu', text)}
+          />
+        </View>
+
         <View style={styles.field}>
           <Text style={styles.label}>Tên sản phẩm:</Text>
           <TextInput
@@ -218,7 +154,6 @@ const CreateProduct = () => {
           />
         </View>
 
-        {/* Description */}
         <View style={styles.field}>
           <Text style={styles.label}>Mô tả:</Text>
           <TextInput
@@ -228,23 +163,23 @@ const CreateProduct = () => {
           />
         </View>
 
-        {/* Category */}
         <View style={styles.field}>
           <Text style={styles.label}>Danh mục:</Text>
-          <View style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 6 }}>
+          <View style={{ borderWidth: 1, borderColor: "#ccc", borderRadius: 6 }}>
             <Picker
               selectedValue={product.category}
               onValueChange={(itemValue) => handleInputChange('category', itemValue)}
+            // style={styles.picker}
             >
               <Picker.Item label="Chọn danh mục" value="" />
               {categories.map((category, index) => (
                 <Picker.Item key={index} label={category.name} value={category._id} />
               ))}
             </Picker>
+
           </View>
         </View>
 
-        {/* Brand */}
         <View style={styles.field}>
           <Text style={styles.label}>Thương hiệu:</Text>
           <TextInput
@@ -254,20 +189,18 @@ const CreateProduct = () => {
           />
         </View>
 
-        {/* Rating */}
         <View style={styles.field}>
           <Text style={styles.label}>Đánh giá:</Text>
           <TextInput
             style={styles.input}
             keyboardType="numeric"
             value={product.rating.toString()}
-            onChangeText={(text) => handleInputChange('rating', parseFloat(text))}
+            onChangeText={(text) => handleInputChange('rating', text === '' ? '' : parseFloat(text))}
           />
         </View>
 
-        {/* Images */}
         <View style={styles.field}>
-          <Text style={styles.label}>Link ảnh sản phẩm:</Text>
+          <Text style={styles.label}>Link ảnh:</Text>
           <TextInput
             style={styles.input}
             value={product.images[0]}
@@ -284,8 +217,6 @@ const CreateProduct = () => {
         {product.variations.map((variation, index) => (
           <View key={index} style={styles.variation}>
             <Text style={styles.subtitle}>Biến thể {index + 1}</Text>
-
-            {/* SKU */}
             <View style={styles.field}>
               <Text style={styles.label}>Mã SKU:</Text>
               <TextInput
@@ -294,19 +225,17 @@ const CreateProduct = () => {
                 onChangeText={(text) => handleVariationChange(index, 'sku', text)}
               />
             </View>
-
-            {/* Giá */}
             <View style={styles.field}>
               <Text style={styles.label}>Giá:</Text>
               <TextInput
                 style={styles.input}
                 keyboardType="numeric"
                 value={variation.price.toString()}
-                onChangeText={(text) => handleVariationChange(index, 'price', parseFloat(text))}
+                onChangeText={(text) =>
+                  handleVariationChange(index, 'price', text === '' ? '' : parseFloat(text))
+                }
               />
             </View>
-
-            {/* Số lượng kho */}
             <View style={styles.field}>
               <Text style={styles.label}>Số lượng kho:</Text>
               <TextInput
@@ -354,6 +283,7 @@ const CreateProduct = () => {
           </View>
         ))}
 
+
         <View style={styles.buttonContainer}>
           <TouchableOpacity onPress={handleAddVariation} style={[styles.button, styles.addButton]}>
             <Text style={styles.buttonText}>Thêm Biến Thể</Text>
@@ -392,6 +322,10 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
   },
+  picker: {
+    borderWidth: 10,
+    borderColor: "red"
+  },
   variation: {
     marginBottom: 20,
     padding: 10,
@@ -415,7 +349,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   addButton: {
-    backgroundColor: 'grey',
+    backgroundColor: "grey",
   },
   submitButton: {
     backgroundColor: COLORS.primary,

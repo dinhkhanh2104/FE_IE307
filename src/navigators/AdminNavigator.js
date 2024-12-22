@@ -19,7 +19,7 @@ const AdminNavigator = () => {
   return (
     <>
       <Drawer.Navigator
-        initialRouteName="Product"
+        initialRouteName="Report"
         screenOptions={{
           headerShown: true,
           headerStyle: {

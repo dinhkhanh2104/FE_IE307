@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const response = await getCart(); // Fetch cart data using your getCart function
         setCart(response);
+        return response
       } catch (err) {
         console.error("Error fetching cart:", err);
       }
@@ -77,7 +78,7 @@ export const AuthProvider = ({ children }) => {
         fetchCart,
         fetchAddress,
         fetchWishlist,
-        wishlist,
+        wishlist, 
         setWishlist,
         role,
         setRole,
