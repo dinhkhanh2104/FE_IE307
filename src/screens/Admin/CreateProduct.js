@@ -4,9 +4,14 @@ import { Picker } from '@react-native-picker/picker'; //
 import { COLORS } from '../../constants/theme';
 import { createProduct } from '../../services/axios/actions/ProductAction';
 import { getCategories } from '../../services/axios/actions/Categories';
+import { useNavigation } from '@react-navigation/native';
+import { goBack } from 'expo-router/build/global-state/routing';
 
 const CreateProduct = () => {
+
+  const navigation = useNavigation()
   const [product, setProduct] = useState({
+    spu: '',
     name: '',
     description: '',
     category: '',
@@ -18,107 +23,20 @@ const CreateProduct = () => {
         sku: '',
         price: 0,
         stockQuantity: 0,
-        images: ["no_thing"],
+        images: [""],
         attributes: [{ attributeName: '', values: [''] }],
-        features: [{ featureName: '', description: '' }],
-        specifications: [{ specName: '', specValue: '' }],
       },
     ],
   });
 
-  const sample = {
-    spu: "CLO-001@",
-    name: "Áo sơ mi nam CoolWear",
-    description: "Áo sơ mi nam CoolWear với chất liệu cotton cao cấp, kiểu dáng hiện đại, phù hợp cho mọi dịp.",
-    category: "67591ec2661c9d22b4bdeaa4",
-    brand: "CoolWear",
-    rating: 4.7,
-    images: ["https://example.com/images/ao-so-mi.jpg"],
-    variations: [
-      {
-        sku: "CLO-001@-BLACK-M",
-        attributes: [
-          {
-            attributeName: "Màu sắc",
-            values: ["Đen"]
-          },
-          {
-            attributeName: "Kích thước",
-            values: ["M"]
-          }
-        ],
-        price: 450000,
-        stockQuantity: 100,
-        images: ["https://example.com/images/ao-so-mi-black-m.jpg"],
-        features: [
-          {
-            featureName: "Chất liệu",
-            description: "Chất liệu cotton 100%, thoáng mát, mềm mại."
-          },
-          {
-            featureName: "Kiểu dáng",
-            description: "Kiểu dáng ôm vừa vặn, phù hợp với phong cách trẻ trung."
-          }
-        ],
-        specifications: [
-          {
-            specName: "Màu sắc",
-            specValue: "Đen"
-          },
-          {
-            specName: "Chất liệu",
-            specValue: "Cotton"
-          }
-        ]
-      },
-      {
-        sku: "CLO-001@-WHITE-L",
-        attributes: [
-          {
-            attributeName: "Màu sắc",
-            values: ["Trắng"]
-          },
-          {
-            attributeName: "Kích thước",
-            values: ["L"]
-          }
-        ],
-        price: 460000,
-        stockQuantity: 80,
-        images: ["https://example.com/images/ao-so-mi-white-l.jpg"],
-        features: [
-          {
-            featureName: "Chất liệu",
-            description: "Chất liệu cotton 100%, thoáng mát, mềm mại."
-          },
-          {
-            featureName: "Kiểu dáng",
-            description: "Kiểu dáng ôm vừa vặn, phù hợp với phong cách trẻ trung."
-          }
-        ],
-        specifications: [
-          {
-            specName: "Màu sắc",
-            specValue: "Trắng"
-          },
-          {
-            specName: "Chất liệu",
-            specValue: "Cotton"
-          }
-        ]
-      }
-    ]
-  };
-
-
+  
   const [categories, setCategories] = useState([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  // const [selectedCategoryId, setSelectedCategoryId] = useState('');
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await getCategories()
-        // console.log(response)
         setCategories(response);
       }
       catch (error) {
@@ -138,13 +56,13 @@ const CreateProduct = () => {
           sku: '',
           price: 0,
           stockQuantity: 0,
+          images: ["no_thing"],
           attributes: [{ attributeName: '', values: [''] }],
-          features: [{ featureName: '', description: '' }],
-          specifications: [{ specName: '', specValue: '' }],
         },
       ],
     }));
   };
+
 
   const handleInputChange = (key, value) => {
     setProduct((prev) => ({
@@ -154,17 +72,27 @@ const CreateProduct = () => {
   };
 
 
-  const handleVariationChange = (index, key, value) => {
-    const updatedVariations = product.variations.map((variation, i) =>
-      i === index
-        ? {
+  const handleVariationChange = (index, key, value, subIndex = null, subKey = null) => {
+    const updatedVariations = product.variations.map((variation, i) => {
+      if (i !== index) return variation;
+
+      if (subIndex !== null && subKey) {
+        return {
           ...variation,
-          [key]: (key === 'price' || key === 'stockQuantity') && value === ''
-            ? 0 // Đặt giá trị mặc định là 0 nếu trống
-            : value,
-        }
-        : variation
-    );
+          [key]: variation[key].map((item, idx) =>
+            idx === subIndex ? { ...item, [subKey]: value } : item
+          ),
+        };
+      }
+
+      return {
+        ...variation,
+        [key]: (key === 'price' || key === 'stockQuantity') && value === ''
+          ? 0
+          : value,
+      };
+    });
+
     setProduct((prev) => ({
       ...prev,
       variations: updatedVariations,
@@ -172,20 +100,29 @@ const CreateProduct = () => {
   };
 
 
+
   const handleSubmit = async () => {
-    // Alert.alert('Product Submitted', JSON.stringify(product, null, 2));
+    const preparedProduct = {
+      ...product,
+      variations: product.variations.map((variation) => ({
+        ...variation,
+        price: parseFloat(variation.price) || 0,
+        stockQuantity: parseInt(variation.stockQuantity) || 0,
+      })),
+    };
 
     try {
-      // const response = await createProduct(product)
-      const response = await createProduct(sample)
-      console.log("createProduct:", response);
-    }
-    catch (error) {
-      console.error("Lỗi mẹ ồi: ", error)
-    }
+      const response = await createProduct(preparedProduct);
+      Alert.alert('Thành công', 'Đã thêm sản phẩm thành công!');
+      navigation.goBack()
+      
+    } catch (error) {
+      console.error("Lỗi mẹ ồi: ", error);
+      Alert.alert('Thất bại', 'Yêu cầu không thể thực hiện!');
 
-
+    }
   };
+
 
 
 
@@ -198,6 +135,16 @@ const CreateProduct = () => {
         <Text style={styles.title}>Thêm Sản Phẩm</Text>
 
         {/* Basic Fields */}
+
+        <View style={styles.field}>
+          <Text style={styles.label}>Mã SPU:</Text>
+          <TextInput
+            style={styles.input}
+            value={product.spu}
+            onChangeText={(text) => handleInputChange('spu', text)}
+          />
+        </View>
+
         <View style={styles.field}>
           <Text style={styles.label}>Tên sản phẩm:</Text>
           <TextInput
@@ -300,8 +247,42 @@ const CreateProduct = () => {
                 }
               />
             </View>
+            <View style={styles.field}>
+              <Text style={styles.label}>Link ảnh:</Text>
+              <TextInput
+                style={styles.input}
+                value={variation.images[0]}
+                onChangeText={(text) =>
+                  handleVariationChange(index, 'images', [text])
+                }
+              />
+            </View>
+            <View style={styles.field}>
+              <Text style={styles.label}>Thuộc tính :</Text>
+              {variation.attributes.map((attribute, attrIndex) => (
+                <View key={attrIndex}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Tên thuộc tính"
+                    value={attribute.attributeName}
+                    onChangeText={(text) =>
+                      handleVariationChange(index, 'attributes', "Màu sắc", attrIndex, 'attributeName')
+                    }
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Giá trị thuộc tính"
+                    value={attribute.values[0]}
+                    onChangeText={(text) =>
+                      handleVariationChange(index, 'attributes', [text], attrIndex, 'values')
+                    }
+                  />
+                </View>
+              ))}
+            </View>
           </View>
         ))}
+
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity onPress={handleAddVariation} style={[styles.button, styles.addButton]}>
