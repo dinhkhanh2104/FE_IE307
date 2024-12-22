@@ -5,7 +5,7 @@ import { Icon, Avatar } from 'react-native-elements';
 import Order from '../screens/Admin/Order';
 import Product from '../screens/Admin/Product';
 import User from '../screens/Admin/User';
-import Voucher from '../screens/Admin/Voucher';
+import DiscountNavigator from './DiscountNavigator';
 import { StatusBar, Image } from 'react-native';
 import { COLORS } from '../constants/theme';
 
@@ -61,8 +61,8 @@ const AdminNavigator = () => {
           component={User}
         />
         <Drawer.Screen
-          name="Voucher"
-          component={Voucher}
+          name="DiscountNavigator"
+          component={DiscountNavigator}
         />
       </Drawer.Navigator>
 

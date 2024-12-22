@@ -136,8 +136,6 @@ const Checkout = ({ route }) => {
         Alert.alert('Lỗi', 'Không thể tạo đơn hàng PayPal');
       }
 
-
-
     } catch (error) {
       console.error('Error creating PayPal order:', error);
       Alert.alert('Lỗi', 'Đã xảy ra lỗi khi tạo đơn hàng PayPal');
@@ -171,7 +169,8 @@ const Checkout = ({ route }) => {
             ward:shippingAddress.ward,
             addressDetail:`${shippingAddress.addressLine}, ${shippingAddress.ward}, ${shippingAddress.city}, ${shippingAddress.country}`
         },
-        paymentMethod: 'cod', // Sử dụng phương thức đã chọn
+        paymentMethod: 'cod',
+        phoneNumber: shippingAddress.phoneNumber
       };
 
       const token = await AsyncStorage.getItem('userToken');
@@ -219,10 +218,13 @@ const Checkout = ({ route }) => {
           price: item.price,
           totalPrice: item.price * item.quantity,
         })),
-        shippingAddress: {
-          detailAddress: `${shippingAddress.addressLine}, ${shippingAddress.ward}, ${shippingAddress.city}, ${shippingAddress.country}`,
-        },
-        paymentMethod: 'paypal', 
+          shippingAddress: {
+            province:shippingAddress.city,
+            ward:shippingAddress.ward,
+            addressDetail:`${shippingAddress.addressLine}, ${shippingAddress.ward}, ${shippingAddress.city}, ${shippingAddress.country}`
+          },
+          paymentMethod: 'paypal',
+          phoneNumber: shippingAddress.phoneNumber
       };
 
       try {
