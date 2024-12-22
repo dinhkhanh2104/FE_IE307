@@ -85,7 +85,7 @@ const Checkout = ({ route }) => {
           discountAmount: data.discountAmount,
           newTotal: data.newTotal,
         }); // Lưu thông tin discount đã áp dụng
-        Alert.alert('Thành công', data.message || 'Voucher đã được áp dụng');
+        Alert.alert('Thành công',  'Voucher đã được áp dụng');
       } else {
         Alert.alert('Lỗi', data.message || 'Không thể áp dụng voucher');
       }
