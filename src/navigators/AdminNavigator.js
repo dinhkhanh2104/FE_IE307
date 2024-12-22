@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { View, TouchableOpacity, Modal, Text, StyleSheet } from 'react-native';
-import { Icon, Avatar } from 'react-native-elements';
+import { Icon } from 'react-native-elements';
 import Order from '../screens/Admin/Order';
-import Product from '../screens/Admin/Product';
 import User from '../screens/Admin/User';
 import DiscountNavigator from './DiscountNavigator';
 import { StatusBar, Image } from 'react-native';
 import { COLORS } from '../constants/theme';
+import Report from '../screens/Admin/Report';
+import ProductNavigator from './ProductNavigator';
+
 
 const Drawer = createDrawerNavigator();
 
 const AdminNavigator = () => {
-  
+
 
   return (
     <>
@@ -37,20 +39,24 @@ const AdminNavigator = () => {
           ),
           headerRight: () => (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: "space-around", gap: 10, paddingRight: 20 }}>
-              <TouchableOpacity  style={{width: 28, height: 28, backgroundColor: COLORS.lightGray, borderRadius: 999, justifyContent: "center", alignItems: "center"}}>
+              <TouchableOpacity style={{ width: 28, height: 28, backgroundColor: COLORS.lightGray, borderRadius: 999, justifyContent: "center", alignItems: "center" }}>
                 <Icon name="bell" type="feather" size={18} color="white" />
               </TouchableOpacity>
               <Image
-                source={require("../../assets/images/admin-avatar.jpg")} 
-                style = {{width: 40, height: 40, borderRadius: 999, }}
+                source={require("../../assets/images/admin-avatar.jpg")}
+                style={{ width: 40, height: 40, borderRadius: 999, }}
               />
             </View>
           ),
         }}
       >
         <Drawer.Screen
+          name="Report"
+          component={Report}
+        />
+        <Drawer.Screen
           name="Product"
-          component={Product}
+          component={ProductNavigator}
         />
         <Drawer.Screen
           name="Order"
@@ -66,13 +72,13 @@ const AdminNavigator = () => {
         />
       </Drawer.Navigator>
 
-      
+
     </>
   );
 };
 
 const styles = StyleSheet.create({
- 
+
 });
 
 export default AdminNavigator;

@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
     products: '/product',
     category: "/category",
     search:  '/product/search',
+    createProduct: "/product/create",
     addCart: "/cart/add",
     wishlish: "/wishlist",
     addToWishlist: "/wishlist/add-to-wishlist/",

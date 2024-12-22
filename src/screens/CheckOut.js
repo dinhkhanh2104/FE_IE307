@@ -598,7 +598,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderColor: '#eee',
-    elevation: 5,
+
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
@@ -623,7 +623,7 @@ const styles = StyleSheet.create({
   },
   webViewContainer: {
     position: 'absolute',
-    top: 0,
+    top: StatusBar.currentHeight,
     left: 0,
     right: 0,
     bottom: 0,

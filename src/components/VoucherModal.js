@@ -18,7 +18,7 @@ const VoucherModal = ({ visible, vouchers, onClose, onApply }) => {
     >
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalHeader}>Active Vouchers</Text>
+          <Text style={styles.modalHeader}>Vouchers hiện có</Text>
           <FlatList
             data={vouchers}
             keyExtractor={(item) => item.id}
@@ -29,15 +29,15 @@ const VoucherModal = ({ visible, vouchers, onClose, onApply }) => {
               >
                 <View>
                   <Text style={styles.voucherTitle}>{item.code}</Text>
-                  <Text style={styles.voucherDiscount}>{item.discountAmount}% off your next order</Text>
-                  <Text style={styles.endDate}>Valid Until: {item.expiry}</Text>
+                  <Text style={styles.voucherDiscount}>{item.discountAmount}% đơn hàng của bạn</Text>
+                  <Text style={styles.endDate}>Ưu đãi đến: {item.expiry}</Text>
                 </View>
-                <Text style={styles.applyText}>Apply</Text>
+                <Text style={styles.applyText}>Áp dụng</Text>
               </TouchableOpacity>
             )}
           />
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeButtonText}>Close</Text>
+            <Text style={styles.closeButtonText}>Đóng</Text>
           </TouchableOpacity>
         </View>
       </View>
