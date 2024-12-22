@@ -52,7 +52,7 @@ const AddVoucherScreen = ({ navigation }) => {
     };
 
     try {
-      const response = await fetch("http://localhost:3305/discount/create", {
+      const response = await fetch("https://ie-307-6017b574900a.herokuapp.com/discount/create", {
         method: "POST",
         body: JSON.stringify(voucherData),
       });
@@ -60,6 +60,7 @@ const AddVoucherScreen = ({ navigation }) => {
       console.log(
        JSON.stringify(voucherData),
       )
+      
       console.log(await response.json())
 
 

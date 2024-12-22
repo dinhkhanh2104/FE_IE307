@@ -187,6 +187,8 @@ const Checkout = ({ route }) => {
 
         const result = await response.json();
 
+        console.log(result)
+
         await fetchCart();
         setIsLoading(false)
 
