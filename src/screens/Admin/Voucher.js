@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,28 +10,37 @@ import {
 import { Card, Badge } from "react-native-paper";
 import Toast from "react-native-toast-message";
 import { getDiscounts, updateDiscountStatus } from "../../services/axios/actions/DiscountAction";
-import Icon from "react-native-vector-icons/FontAwesome"; // Import icon library
+import Icon from "react-native-vector-icons/FontAwesome";
+import { useFocusEffect } from "@react-navigation/native";
 
-const DiscountManagementScreen = ({ navigation }) => {  // Add navigation prop
+const DiscountManagementScreen = ({ navigation }) => {  
   const [discounts, setDiscounts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchDiscounts = async () => {
-      try {
-        const response = await getDiscounts(); // Lấy tất cả các discount từ API
-        if (response && response.data) {
-          setDiscounts(response.data);
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchDiscounts = async () => {
+        setIsLoading(true);
+        try {
+          const response = await getDiscounts();
+          if (response && response.data) {
+            setDiscounts(response.data);
+          }
+        } catch (error) {
+          console.error("Lỗi khi lấy danh sách discount:", error);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        console.error("Lỗi khi lấy danh sách discount:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchDiscounts();
-  }, []);
+      };
+  
+      fetchDiscounts();
+  
+      return () => {
+        // Cleanup nếu cần thiết
+      };
+    }, [])
+  );
+  
 
   const toggleDiscountStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === "active" ? "inactive" : "active";

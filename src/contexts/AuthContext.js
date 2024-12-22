@@ -57,6 +57,14 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
+  // Đăng xuất
+  const logout = async () => {
+    setUser(null);
+    setToken(null);
+    await AsyncStorage.removeItem('userInfo');
+    await AsyncStorage.removeItem('token');
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -72,7 +80,8 @@ export const AuthProvider = ({ children }) => {
         wishlist,
         setWishlist,
         role,
-        setRole
+        setRole,
+        logout
       }}
     >
       {children}
