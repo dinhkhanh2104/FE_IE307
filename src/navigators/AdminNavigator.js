@@ -19,7 +19,6 @@ const AdminNavigator = () => {
       <Drawer.Navigator
         initialRouteName="Product"
         screenOptions={{
-          title: '',
           headerShown: true,
           headerStyle: {
             height: StatusBar.currentHeight + 50,
