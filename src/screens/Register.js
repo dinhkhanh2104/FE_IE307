@@ -46,6 +46,7 @@ const Register = ({ navigation }) => {
 
         try {
             const response = await register(email.trim(), password.trim(), username.trim());
+            console.log("Register response", response);
 
             Toast.show({ type: 'success', text1: "Register Successfully" });
             setTimeout(handleNavigateLogin, 1000);

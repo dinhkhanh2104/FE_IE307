@@ -57,7 +57,30 @@ const Cart = ({ navigation }) => {
   };
 
   const delCart = async (sku, productId) => {
-    // Implement cart deletion logic
+    const token = await AsyncStorage.getItem('userToken');
+    try {
+      const response = await fetch('https://ie-307-6017b574900a.herokuapp.com/cart/remove', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          sku,
+          productId,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCart(data.cart.items);
+        setCartItems(data.cart.items);  // Update cart items locally for UI
+      } else {
+        console.error('Failed to delete cart item:', response);
+      }
+    } catch (error) {
+      console.error('Error deleting cart item:', error);
+    }
   };
 
   // Increment Quantity
