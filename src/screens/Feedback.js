@@ -14,7 +14,7 @@ const FeedbackScreen = ({ navigation,route }) => {
   // Validate form data
   const validateForm = () => {
     if (!name || !email || !feedback) {
-      Alert.alert('Error', 'Please fill all the fields');
+      Alert.alert('Lỗi', 'Nhập nội dung thiếu rồi kìa');
       return false;
     }
     // Add more validation if needed (e.g., email format)
@@ -30,7 +30,7 @@ const FeedbackScreen = ({ navigation,route }) => {
       // Call your API or handle the data submission
       console.log('Feedback submitted:', feedbackData);
 
-      Alert.alert('Success', 'Your feedback has been submitted');
+      Alert.alert('Thành công', 'Cảm ơn bạn đã đánh giá');
       navigation.goBack(); // Go back to previous screen after submission
     }
   };

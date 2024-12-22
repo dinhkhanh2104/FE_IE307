@@ -104,7 +104,7 @@ const OrderDetailScreen = ({ route, navigation }) => {
       </View>
 
       <View style={styles.buttons}>
-        <TouchableOpacity style={styles.button} onPress={() => alert('Reorder pressed')}>
+        <TouchableOpacity style={styles.button} onPress={() => alert('Đã nhấn đặt lại')}>
           <Text style={styles.buttonText}>Đặt lại</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("FeedbackScreen",{productId:order.items})}>

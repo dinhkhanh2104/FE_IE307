@@ -131,13 +131,13 @@ const ProductDetail = ({ route, navigation }) => {
       const response = await addToCart(selectedItem.sku, product?._id)
       Toast.show({
         type: 'success',
-        text1: "Add to cart successfully",
+        text1: "Thêm vào giỏ hàng thành công",
       });
       await fetchCart()
     }
     catch (error) {
       console.error("Error", error);
-      Toast.show({ type: 'error', text1: "Add to cart failed. Please try again." });
+      Toast.show({ type: 'error', text1: "Thêm vào giỏ hàng lỗi, hãy thử lại." });
     }
   }
 

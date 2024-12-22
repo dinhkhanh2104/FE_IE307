@@ -115,11 +115,10 @@ const CreateProduct = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
 
   useEffect(() => {
-    // Giả lập fetch dữ liệu từ API
     const fetchCategories = async () => {
       try {
         const response = await getCategories()
-        console.log(response)
+        // console.log(response)
         setCategories(response);
       }
       catch (error) {

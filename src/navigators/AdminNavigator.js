@@ -53,22 +53,27 @@ const AdminNavigator = () => {
         <Drawer.Screen
           name="Report"
           component={Report}
+          options={{title: "Báo Cáo Tổng Quan"}}
         />
         <Drawer.Screen
           name="Product"
           component={ProductNavigator}
+          options={{title: "Quản Lý Sản Phẩm"}}
         />
         <Drawer.Screen
           name="Order"
           component={Order}
+          options={{title: "Quản Lý Đơn Hàng"}}
         />
         <Drawer.Screen
           name="User"
           component={User}
+          options={{title: "Quản Lý Người Dùng"}}
         />
         <Drawer.Screen
-          name="DiscountNavigator"
+          name="Discount"
           component={DiscountNavigator}
+          options={{title: "Quản Lý Mã Giảm Giá"}}
         />
       </Drawer.Navigator>
 
