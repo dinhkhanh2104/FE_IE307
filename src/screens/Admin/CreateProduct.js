@@ -13,9 +13,14 @@ import { Picker } from '@react-native-picker/picker';
 import { COLORS } from '../../constants/theme';
 import { createProduct } from '../../services/axios/actions/ProductAction';
 import { getCategories } from '../../services/axios/actions/Categories';
+import { useNavigation } from '@react-navigation/native';
+import { goBack } from 'expo-router/build/global-state/routing';
 
 const CreateProduct = () => {
+
+  const navigation = useNavigation()
   const [product, setProduct] = useState({
+    spu: '',
     spu: '',
     name: '',
     description: '',
@@ -28,20 +33,20 @@ const CreateProduct = () => {
         sku: '',
         price: 0,
         stockQuantity: 0,
-        images: [''],
+        images: [""],
         attributes: [{ attributeName: '', values: [''] }],
-        features: [{ featureName: '', description: '' }],
-        specifications: [{ specName: '', specValue: '' }],
       },
     ],
   });
 
+  
   const [categories, setCategories] = useState([]);
+  // const [selectedCategoryId, setSelectedCategoryId] = useState('');
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await getCategories();
+        const response = await getCategories()
         setCategories(response);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -122,55 +127,61 @@ const CreateProduct = () => {
           sku: '',
           price: 0,
           stockQuantity: 0,
-          images: [''],
           attributes: [{ attributeName: '', values: [''] }],
-          features: [{ featureName: '', description: '' }],
-          specifications: [{ specName: '', specValue: '' }],
         },
       ],
     }));
   };
 
-  const handleSubmit = async () => {
-    // Kiểm tra các trường bắt buộc
-    if (!product.spu || product.spu.trim() === '') {
-      Alert.alert('Lỗi', 'Vui lòng nhập mã sản phẩm (SPU).');
-      return;
-    }
+  const handleInputChange = (key, value) => {
+    setProduct((prev) => ({
+      ...prev,
+      [key]: key === 'rating' && value === '' ? 0 : value, // Đặt giá trị mặc định là 0 nếu trống
+    }));
+  };
 
-    if (!product.variations.every((variation) =>
-      variation.attributes.every((attr) => attr.attributeName && attr.attributeName.trim() !== '')
-    )) {
-      Alert.alert('Lỗi', 'Vui lòng nhập tên thuộc tính cho tất cả các biến thể.');
-      return;
-    }
+
+  const handleVariationChange = (index, key, value) => {
+    const updatedVariations = product.variations.map((variation, i) =>
+      i === index
+        ? {
+          ...variation,
+          [key]: (key === 'price' || key === 'stockQuantity') && value === ''
+            ? 0 // Đặt giá trị mặc định là 0 nếu trống
+            : value,
+        }
+        : variation
+    );
+    setProduct((prev) => ({
+      ...prev,
+      variations: updatedVariations,
+    }));
+  };
+
+
+  const handleSubmit = async () => {
+    // Alert.alert('Product Submitted', JSON.stringify(product, null, 2));
 
     try {
-      const response = await createProduct(product);
-      Alert.alert('Thành công', 'Sản phẩm đã được tạo!');
-      console.log('Product created:', response);
-    } catch (error) {
-      console.error('Error creating product:', error);
-      Alert.alert('Thất bại', 'Không thể tạo sản phẩm. Vui lòng thử lại.');
+      // const response = await createProduct(product)
+      const response = await createProduct(sample)
+      console.log("createProduct:", response);
     }
+    catch (error) {
+      console.error("Lỗi mẹ ồi: ", error)
+    }
+
+
   };
+
+
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         <Text style={styles.title}>Thêm Sản Phẩm</Text>
 
-        {/* SPU */}
-        <View style={styles.field}>
-          <Text style={styles.label}>Mã sản phẩm (SPU):</Text>
-          <TextInput
-            style={styles.input}
-            value={product.spu}
-            onChangeText={(text) => handleInputChange('spu', text)}
-          />
-        </View>
-
-        {/* Name */}
+        {/* Basic Fields */}
         <View style={styles.field}>
           <Text style={styles.label}>Tên sản phẩm:</Text>
           <TextInput
@@ -280,66 +291,9 @@ const CreateProduct = () => {
                 }
               />
             </View>
-
-            {/* Ảnh */}
-            <Text style={styles.subtitle}>Ảnh:</Text>
-            {variation.images.map((image, imgIndex) => (
-              <View key={imgIndex} style={styles.field}>
-                <Text style={styles.label}>Link ảnh {imgIndex + 1}:</Text>
-                <TextInput
-                  style={styles.input}
-                  value={image}
-                  onChangeText={(text) => handleImageChange(index, imgIndex, text)}
-                />
-              </View>
-            ))}
-
-             {/* Attributes */}
-             <Text style={styles.subtitle}>Thuộc tính:</Text>
-            {variation.attributes.map((attribute, attrIndex) => (
-              <View key={attrIndex} style={styles.field}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Tên thuộc tính (e.g., Màu sắc)"
-                  value={attribute.attributeName}
-                  onChangeText={(text) =>
-                    handleNestedChange('attributes', index, attrIndex, 'attributeName', text)
-                  }
-                />
-                {attribute.values.map((value, valueIndex) => (
-                  <TextInput
-                    key={valueIndex}
-                    style={[styles.input, { marginTop: 5 }]}
-                    placeholder={`Giá trị ${valueIndex + 1}`}
-                    value={value}
-                    onChangeText={(text) =>
-                      handleNestedChange(
-                        'attributes',
-                        index,
-                        attrIndex,
-                        'values',
-                        text,
-                        valueIndex
-                      )
-                    }
-                  />
-                ))}
-                {/* <TouchableOpacity
-                  style={[styles.button, styles.addButton, { marginTop: 10 }]}
-                  onPress={() => handleAddAttributeValue(index, attrIndex)}
-                >
-                  <Text style={styles.buttonText}>Thêm Giá Trị</Text>
-                </TouchableOpacity> */}
-              </View>
-            ))}
-            <TouchableOpacity
-              style={[styles.button, styles.addButton]}
-              onPress={() => handleAddImage(index)}
-            >
-              <Text style={styles.buttonText}>Thêm Ảnh</Text>
-            </TouchableOpacity>
           </View>
         ))}
+
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity onPress={handleAddVariation} style={[styles.button, styles.addButton]}>

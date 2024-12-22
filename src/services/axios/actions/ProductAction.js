@@ -64,33 +64,42 @@ export const searchProducts = async (searchText) => {
 }
 
 export const createProduct = async (product) => {
+
     try {
         const token = await AsyncStorage.getItem('userToken');
         if (!token) {
             throw new Error('User token is not available');
         }
 
-        // Gửi yêu cầu POST để tạo sản phẩm
-        const response = await fetch('https://ie-307-6017b574900a.herokuapp.com/product/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify(product), // Chuyển đối tượng sản phẩm thành chu
-        });
+        const response = await axiosInstance.post(API_ENDPOINTS.createProduct, (product))
 
-        // Kiểm tra kết quả
-        const data = await response.json();
-        console.log('Product Data:', data);
+        console.log(JSON.stringify(product));
+        console.log("data: ", response.data);
 
-        if (!response.ok) {
-            throw new Error(data.message || 'Failed to create product');
-        }
-
-        return data.data; // Trả về dữ liệu sản phẩm mới tạo
+        return response.data.data;
     } catch (error) {
-        console.error('Error creating product:', error);
-        throw error; // Bắn lỗi để xử lý bên ngoài
+        console.error("Error fetching product data: ", error);
+        throw error;
     }
-};
+
+}
+
+export const updateProduct = async (product) => {
+    try {
+        const token = await AsyncStorage.getItem('userToken');
+        if (!token) {
+            throw new Error('User token is not available');
+        }
+        const response = await axiosInstance.post(`https://ie-307-6017b574900a.herokuapp.com/product/${product._id}/update`, product);
+
+        console.log(JSON.stringify(product));
+        console.log("data: ", response.data);
+
+        return response.data.data;
+    } catch (error) {
+        console.error("Error fetching product data: ", error);
+        throw error;
+    }
+}
+
+
