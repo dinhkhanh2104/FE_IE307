@@ -14,6 +14,7 @@ import Toast from 'react-native-toast-message';
 const Register = ({ navigation }) => {
 
     const [email, setEmail] = useState("")
+    const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
 
@@ -45,7 +46,7 @@ const Register = ({ navigation }) => {
         }
 
         try {
-            const response = await register(email.trim(), password.trim());
+            const response = await register(email.trim(), password.trim(), username.trim());
             Toast.show({ type: 'success', text1: "Register Successfully" });
             setTimeout(handleNavigateLogin, 1000);
         } catch (error) {
@@ -65,6 +66,13 @@ const Register = ({ navigation }) => {
             </View>
 
             <View style={styles.inputField}>
+                <InputField
+                    icon={<FontAwesome6 name="user-large" size={24} color={COLORS.semiGray} />}
+                    placeholder={"User Name"}
+                    isPassword={false}
+                    value={username}
+                    onChangeText={(value) => { setUsername(value) }}
+                />
                 <InputField
                     icon={<FontAwesome6 name="user-large" size={24} color={COLORS.semiGray} />}
                     placeholder={"Email"}
