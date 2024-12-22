@@ -43,9 +43,9 @@ const AddressSelection = () => {
         setAddress(updatedAddresses)
         
         // Optionally, you can alert the user that the address has been updated
-        Alert.alert('Success', 'This address has been set as default');
+        Alert.alert('Thành công', 'Đã đặt địa chỉ này là địa chỉ mặc định !');
       } else {
-        throw new Error(data.message || 'Failed to set default address');
+        throw new Error(data.message || 'Lỗi đặt địa chỉ mặt định');
       }
     } catch (error) {
       console.error("Error setting default address:", error);

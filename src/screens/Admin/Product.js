@@ -4,6 +4,10 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 
 const Product = ({navigation}) => {
 
+  // useEffect(() => {
+    
+  // }, []);
+
   return (
     <SafeAreaView style={styles.container}>
 
@@ -14,6 +18,8 @@ const Product = ({navigation}) => {
           <Text style={{ fontSize: 16, fontWeight: '500', color: "white" }}>Add Product</Text>
         </TouchableOpacity>
       </View>
+
+
 
       
     </SafeAreaView>
