@@ -4,7 +4,7 @@ import { View, TouchableOpacity, Modal, Text, StyleSheet } from 'react-native';
 import { Icon } from 'react-native-elements';
 import Order from '../screens/Admin/Order';
 import User from '../screens/Admin/User';
-import Voucher from '../screens/Admin/Voucher';
+import DiscountNavigator from './DiscountNavigator';
 import { StatusBar, Image } from 'react-native';
 import { COLORS } from '../constants/theme';
 import Report from '../screens/Admin/Report';
@@ -67,8 +67,8 @@ const AdminNavigator = () => {
           component={User}
         />
         <Drawer.Screen
-          name="Voucher"
-          component={Voucher}
+          name="DiscountNavigator"
+          component={DiscountNavigator}
         />
       </Drawer.Navigator>
 
