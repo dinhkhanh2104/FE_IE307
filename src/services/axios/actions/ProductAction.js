@@ -70,31 +70,27 @@ export const createProduct = async (product) => {
             throw new Error('User token is not available');
         }
 
+        // Gửi yêu cầu POST để tạo sản phẩm
         const response = await fetch('https://ie-307-6017b574900a.herokuapp.com/product/create', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`,
-                body: JSON.stringify(product)
             },
-
+            body: JSON.stringify(product), // Chuyển đối tượng sản phẩm thành chu
         });
 
-        console.log(JSON.stringify(product))
-
-
-        console.log(await response.json())
-        // if (response.status === 201) {
+        // Kiểm tra kết quả
         const data = await response.json();
-        console.log(data)
-        return data.data
-        // }
-        // else {
-        //     throw new Error("Fail to fetch cart")
-        // }
+        console.log('Product Data:', data);
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to create product');
+        }
+
+        return data.data; // Trả về dữ liệu sản phẩm mới tạo
+    } catch (error) {
+        console.error('Error creating product:', error);
+        throw error; // Bắn lỗi để xử lý bên ngoài
     }
-    catch (error) {
-        // console.error("Error fetching cart", error);
-        throw error
-    }
-}
+};

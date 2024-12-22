@@ -8,7 +8,6 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Fontisto from '@expo/vector-icons/Fontisto';
 import Button from '../components/Button'
 import { register } from '../services/axios/actions/UserAction'
-import { EventSubscriptionVendor } from 'react-native'
 import Toast from 'react-native-toast-message';
 
 const Register = ({ navigation }) => {
@@ -47,6 +46,7 @@ const Register = ({ navigation }) => {
 
         try {
             const response = await register(email.trim(), password.trim(), username.trim());
+
             Toast.show({ type: 'success', text1: "Register Successfully" });
             setTimeout(handleNavigateLogin, 1000);
         } catch (error) {

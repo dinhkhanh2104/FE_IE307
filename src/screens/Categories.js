@@ -1,4 +1,4 @@
-import { SafeAreaView, StyleSheet, Text, View, ScrollView, FlatList, TouchableOpacity, Image, StatusBar } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, ScrollView, FlatList, TouchableOpacity, Image, StatusBar } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { getProducts } from '../services/axios/actions/ProductAction';
 import { getCategories } from '../services/axios/actions/Categories';

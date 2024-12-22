@@ -6,6 +6,7 @@ import Profile from "../screens/Profile";
 import MyOrdersScreen from "../screens/MyOrder";
 import OrderDetailScreen from "../screens/OrderDetailScreen";
 import FeedbackScreen from "../screens/Feedback";
+import ChangeProfileScreen from "../screens/ChangeProfileScreen";
 const Stack = createStackNavigator()
 
 const ProfileNavigator = () => {
@@ -57,6 +58,13 @@ const ProfileNavigator = () => {
             <Stack.Screen
                 name="FeedbackScreen"
                 component={FeedbackScreen}
+                options={{
+                    headerShown: false
+                }}
+            />
+            <Stack.Screen
+                name="ChangeProfileScreen"
+                component={ChangeProfileScreen}
                 options={{
                     headerShown: false
                 }}

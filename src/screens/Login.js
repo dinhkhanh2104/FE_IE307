@@ -42,6 +42,8 @@ const Login = ({ navigation }) => {
       });
       setRole(response.data.user.role);
       await AsyncStorage.setItem('userToken', response.data.token); 
+      await AsyncStorage.setItem('userInfo', response.data.user._id); 
+      
       setTimeout(() => {
         setToken(response.data.token);
       }, 1500);
