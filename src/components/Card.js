@@ -3,11 +3,19 @@ import React from 'react';
 import { Icon } from 'react-native-elements';
 import { COLORS, SIZES } from '../constants/theme';
 
-const Card = ({ data, onPress}) => {
-    // console.log(data.);
-    
+const Card = ({ data, onPress, isDiscounted = false }) => {
+
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+        }).format(amount);
+    };
+
+    const discountRandom = Math.floor(Math.random() * 40) + 11;
+
     return (
-        <TouchableOpacity 
+        <TouchableOpacity
             style={styles.cardContainer}
             onPress={onPress}
         >
@@ -16,7 +24,7 @@ const Card = ({ data, onPress}) => {
                     source={{ uri: data.images[0] }}
                     style={styles.cardImage}
                 />
-                <Text style={styles.cardPercentSale}> - 40%</Text>
+                {isDiscounted ? (<Text style={styles.cardPercentSale}> - {discountRandom}%</Text>) : <Text></Text> }   
             </View>
 
             <View style={{ paddingHorizontal: 8, gap: 10 }}>
@@ -28,11 +36,12 @@ const Card = ({ data, onPress}) => {
                 </Text>
 
                 <View style={{ flexDirection: "row", justifyContent: "flex-start" }}>
-                    <Text style={styles.cardPrice}>$ {data.variations[0].price}</Text>
-                    <Text style={styles.cardOldPrice}>$ {data.variations[0].oldPrice}</Text>
+                    <Text style={styles.cardPrice}>{formatCurrency(data.variations[0].price)}</Text>
+                    {/* <Text style={styles.cardOldPrice}>$ {data.variations[0].oldPrice}</Text> */}
                 </View>
 
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 10}}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <Text style={styles.ratingAmount}>{data.rating}</Text>
                     <View style={{ flexDirection: "row" }}>
                         {
                             Array.from({ length: 5 }).map((_, index) => {
@@ -51,7 +60,6 @@ const Card = ({ data, onPress}) => {
                             })
                         }
                     </View>
-                    <Text style={styles.cardAmount}>8999</Text>
                 </View>
             </View>
         </TouchableOpacity>
@@ -96,26 +104,27 @@ const styles = StyleSheet.create({
         overflow: "hidden",
     },
     cardTitle: {
+        color: "black",
         fontFamily: "Montserrat_600SemiBold",
-        fontSize: SIZES.font14,
     },
     cardDescription: {
         fontFamily: "Montserrat_400Regular",
-        fontSize: SIZES.font12,
+        fontSize: 13,
+        color: "black",
     },
     cardPrice: {
         color: "red",
         fontFamily: "Montserrat_600SemiBold",
         fontSize: SIZES.font14,
-        width: 60
+        width: 150
     },
     cardOldPrice: {
         color: "#BBBBBB",
         textDecorationLine: "line-through",
         fontSize: SIZES.font14,
     },
-    cardAmount: {
-        fontFamily: "Montserrat_300Light",
-        fontSize: SIZES.font12,
+    ratingAmount: {
+        fontSize: 13,
+        fontWeight: "bold"
     }
 });

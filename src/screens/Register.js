@@ -1,4 +1,4 @@
-import { Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import { SIZES } from '../constants/theme'
 import InputField from '../components/InputField'
@@ -7,16 +7,56 @@ import { COLORS } from '../constants/theme'
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Fontisto from '@expo/vector-icons/Fontisto';
 import Button from '../components/Button'
+import { register } from '../services/axios/actions/UserAction'
+import Toast from 'react-native-toast-message';
 
 const Register = ({ navigation }) => {
 
-    const [username, setUsername] = useState()
-    const [password, setPassword] = useState()
-    const [confirmPassword, setConfirmPassword] = useState()
+    const [email, setEmail] = useState("")
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
 
     const handleNavigateLogin = () => {
         navigation.navigate("Login")
     }
+
+    const handleRegister = async () => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+            Toast.show({ type: 'error', text1: "Email, password, and confirm password must not be empty!" });
+            return;
+        }
+
+        if (!emailRegex.test(email.trim())) {
+            Toast.show({ type: 'error', text1: "Invalid email format!" });
+            return;
+        }
+
+        if (password.length < 6) {
+            Toast.show({ type: 'error', text1: "Password must be at least 6 characters long!" });
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            Toast.show({ type: 'error', text1: "Password and confirm password do not match!" });
+            return;
+        }
+
+        try {
+            const response = await register(email.trim(), password.trim(), username.trim());
+            console.log("Register response", response);
+
+            Toast.show({ type: 'success', text1: "Register Successfully" });
+            setTimeout(handleNavigateLogin, 1000);
+        } catch (error) {
+            console.error("Error", error);
+            Toast.show({ type: 'error', text1: "Registration failed. Please try again." });
+        }
+    };
+
+
 
     return (
         <SafeAreaView style={styles.container}>
@@ -29,10 +69,17 @@ const Register = ({ navigation }) => {
             <View style={styles.inputField}>
                 <InputField
                     icon={<FontAwesome6 name="user-large" size={24} color={COLORS.semiGray} />}
-                    placeholder={"Username"}
+                    placeholder={"User Name"}
                     isPassword={false}
                     value={username}
                     onChangeText={(value) => { setUsername(value) }}
+                />
+                <InputField
+                    icon={<FontAwesome6 name="user-large" size={24} color={COLORS.semiGray} />}
+                    placeholder={"Email"}
+                    isPassword={false}
+                    value={email}
+                    onChangeText={(value) => { setEmail(value) }}
                 />
                 <InputField
                     icon={<Fontisto name="locked" size={24} color={COLORS.semiGray} />}
@@ -54,7 +101,7 @@ const Register = ({ navigation }) => {
                 By clicking the <Text style={{ color: "#ff4b26" }}>Register</Text> button, you agree to the public offer
             </Text>
 
-            <Button title={"Create Account"} />
+            <Button title={"Create Account"} onPress={handleRegister} />
 
             <View style={styles.thirdParty}>
                 <Text style={[styles.text, { width: "100%", textAlign: "center" }]}>- Or continue with -</Text>
@@ -95,6 +142,11 @@ const Register = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
             </View>
+
+            <Toast
+                position='bottom'
+                bottomOffset={20} 
+            />
         </SafeAreaView>
     )
 }
@@ -107,6 +159,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingBottom: 40,
         paddingHorizontal: 26,
+        backgroundColor: "white"
     },
     header: {
         marginTop: 80,
